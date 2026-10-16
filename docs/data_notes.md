@@ -2,13 +2,14 @@
 
 Things that are not obvious from the code but matter for anyone who uses
 `data/processed/` downstream. The numbers come from `outputs/metrics/*.json` for
-Oct 2025 – Sep 2026 (11 months loaded; February 2026 is quarantined, see §7).
+Oct 2025 – Sep 2026 (all 12 months loaded; February 2026 is included and its
+shutdown is flagged, see §7).
 
 ## 1. Station IDs that lost their trailing zero
 
 Station IDs look like decimals (`5980.10`), and some rows in the trip CSVs have
 them with the trailing zero dropped (`5980.1`). This happens in every month, mostly in
-`end_station_id` (12 months: 643,381 end IDs and 93,237 start IDs). It's probably
+`end_station_id` (12 months: 651,570 end IDs and 96,479 start IDs). It's probably
 a numeric round-trip somewhere upstream.
 
 Left alone, one physical station appears under two IDs, which splits its
@@ -81,7 +82,8 @@ the last day of the previous month. **April 2026 is the exception**: its file is
 *start* time, so its 495 rides that ended on May 1 also appear in the May file. Those
 495 rides are the only cross-file duplicates (`data_quality.json → observations`).
 `trips_clean` keeps both copies, because each month was cleaned and verified on its
-own. `demand_15min` counts each of them once (it dedupes `ride_id` among rides that
+own. This is a **documented limitation, kept by decision** (affects 0.001% of rides;
+stations.parquet counts include both copies). `demand_15min` counts each of them once (it dedupes `ride_id` among rides that
 cross a month boundary).
 
 Consequences for `demand_15min`, where each target month is built from the files for
@@ -90,32 +92,31 @@ months T-1, T and T+1:
 - **Arrivals are complete** for every loaded month: 0 dropped.
 - **Departures are missing where the *next* month's file isn't loaded.** A ride that starts
   on the last evening of month T and ends after midnight is in month T+1's file. So
-  the late evening of **2026-09-30** (the October file isn't loaded) and of
-  **2026-01-31** (February is quarantined) lack the departures of rides that crossed
-  midnight, roughly a few hundred each. That under-counts departures and
+  the late evening of **2026-09-30** (the October file isn't loaded) lacks the departures
+  of rides that crossed midnight, roughly a few hundred. That under-counts departures and
   `net_outflow` in those last buckets only.
-- Rides that started in a month that isn't loaded (Sep 2025, Feb 2026) but ended in a
-  loaded month count only as arrivals. 1,028 departures fall outside the loaded
-  months and are dropped (`eda_summary.json → dropped_edge_rides`).
+- Rides that started in September 2025 (not loaded) but ended in October count only as
+  arrivals. 618 departures fall outside the loaded months and are dropped
+  (`eda_summary.json → dropped_edge_rides`).
 
 (The Stage 1 note said "first-day arrivals" were missing. That assumed files split by
 start time, and it was the wrong way round: the gap is departures before a missing month.)
 
 ## 5. Citi Bike data arrives (almost) pre-cleaned
 
-Across the 11 loaded months (44,164,661 raw rows → 44,129,501 clean), the cleaning
-rules remove 0.08% of rows:
+Across the 12 months (45,384,105 raw rows → 45,347,219 clean), the cleaning rules remove
+0.08% of rows:
 
 | rule | removed | share |
 |---|---:|---:|
 | null or unparseable timestamp | 0 | 0% |
 | `ended_at <= started_at` | 482 | 0.001% |
-| duration > 24 h | 9,677 | 0.022% |
-| null `start_station_id` (dockless e-bike starts) | 25,001 | 0.057% |
+| duration > 24 h | 10,284 | 0.023% |
+| null `start_station_id` (dockless e-bike starts) | 26,120 | 0.058% |
 | duplicate `ride_id` within a month | 0 | 0% |
 
 Only 4 rides last under 60 s (Lyft filters these out before publishing).
-`end_station_missing` is flagged, not dropped: 112,697 rides (0.26%) count as
+`end_station_missing` is flagged, not dropped: 119,968 rides (0.26%) count as
 departures with no arrival. So the cleaning step is mostly a guard. The real
 problems are the station-ID, timezone and file-boundary issues above.
 
@@ -138,22 +139,54 @@ at least 100 rides. A month with uncovered days, or more than 1% of rides starti
 is recorded in `data_quality.json → quarantined_months`. Include it with
 `python -m src.clean --include YYYY-MM`, then rerun `scripts/build_features.sh`.
 
-**February 2026 is quarantined.** Feb 23 has 0 rides in New York time, while every
-other February day has 13k–76k. In the raw file, rides taper off on the evening of
-Feb 22, stop at about 20:00, and resume at about 06:00 on Feb 24 (around 34 hours with
-almost no rides, New York time). That is a
-system-wide service suspension (it looks like a storm), not a truncated file. The
-other 27 days look normal (1.22M rides). Whether to include it is a modelling
-decision: including it teaches a model that shutdown days happen; excluding it
-leaves a 28-day gap.
+**February 2026 was quarantined, then included by decision.** Feb 23 has 0 rides in
+New York time, while every other February day has 13k–76k. In the raw file, rides taper off
+on the evening of Feb 22, stop at about 20:00, and resume at about 06:00 on Feb 24
+(around 34 hours with almost no rides, New York time). That is a system-wide service
+suspension (it looks like a storm), not a truncated file. February was cleaned with
+`--include 2026-02` (1,217,718 clean rows) and its shutdown is flagged as disrupted (below).
 
 **April 2026** looked suspicious (a 164 MB zip against about 1 GB for other months), but it
 passed: all 30 days covered, 39k–179k rides per day, 3.86M rows. The small zip is
 only compression (§6).
 
-**Low days that passed:** Jan 25, 2026 had 3,050 rides (the quietest loaded day; it
-looks like another storm), and Sep 27, 2026 had 33,299. Both are above the 100-ride
-floor, so they're included as real low-demand days.
+### Disrupted days (`disrupted_day` in `demand_15min`, `disrupted` in features)
+
+`src/aggregate_demand.py` flags a 15-minute bucket as disrupted if it falls in:
+
+- **The manual window** 2026-02-22 20:00 → 2026-02-24 06:00 (New York): the shutdown above.
+- **The manual days** 2026-01-25 and 2026-09-27.
+- **Any day whose rides are below 40% of the median of the same weekday within ±4
+  weeks** (the day itself excluded).
+
+The rule uses a *local* weekday median on purpose. Against a year-wide median for
+each weekday, the 40% rule flags **50 days**, including 20 of February's 28, because it
+measures winter, not disruption. The local rule flags **23 days**, all of which are holidays
+or weather events (`outputs/metrics/disrupted_days.json`):
+
+| date | rides | vs local median | likely cause |
+|---|---:|---:|---|
+| 2025-12-14 | 24,145 | 36% | weather |
+| 2025-12-25 | 25,516 | 27% | Christmas |
+| 2025-12-26 | 30,125 | 38% | holiday week |
+| 2025-12-27 | 12,858 | 22% | holiday week / weather |
+| 2026-01-01 | 28,245 | 30% | New Year's Day |
+| 2026-01-25 | 3,050 | 11% | storm (manual) |
+| 2026-01-26 – 01-31 | 6,037 – 22,426 | 14–38% | storm aftermath (6 days) |
+| 2026-02-07 | 18,703 | 36% | weather |
+| 2026-02-22 | 19,008 | 39% | shutdown begins 20:00 |
+| 2026-02-23 | 0 | 0% | shutdown |
+| 2026-02-24 | 13,095 | 23% | shutdown ends 06:00 |
+| 2026-02-25 | 28,453 | 40% | recovery |
+| 2026-04-25 | 39,048 | 30% | weather |
+| 2026-05-23 – 05-24 | 52,739 / 42,610 | 33% / 26% | Memorial Day weekend weather |
+| 2026-07-06 | 63,896 | 37% | holiday (observed July 4) |
+| 2026-09-26 | 63,053 | 33% | weather |
+| 2026-09-27 | 33,299 | 24% | weather (manual) |
+
+The "likely cause" column is an informed guess from dates and patterns, not checked
+against weather records. Holidays get flagged even though they are predictable. A later
+model could learn them from a holiday feature instead of excluding them.
 
 ## 8. Memory: building on an 8 GB machine
 

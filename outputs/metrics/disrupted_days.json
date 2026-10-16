@@ -1,0 +1,178 @@
+{
+  "rule": "day rides < 40% of the median of the same weekday within +-4 weeks (day itself excluded); plus manual windows/days",
+  "manual_windows": [
+    [
+      "2026-02-22 20:00:00",
+      "2026-02-24 06:00:00"
+    ]
+  ],
+  "manual_days": [
+    "2026-01-25",
+    "2026-09-27"
+  ],
+  "auto_days": [
+    {
+      "date": "2025-12-14",
+      "rides": 24145,
+      "local_weekday_median": 67315.0,
+      "ratio": 0.359
+    },
+    {
+      "date": "2025-12-25",
+      "rides": 25516,
+      "local_weekday_median": 94471.0,
+      "ratio": 0.27
+    },
+    {
+      "date": "2025-12-26",
+      "rides": 30125,
+      "local_weekday_median": 79393.5,
+      "ratio": 0.379
+    },
+    {
+      "date": "2025-12-27",
+      "rides": 12858,
+      "local_weekday_median": 59675.5,
+      "ratio": 0.215
+    },
+    {
+      "date": "2026-01-01",
+      "rides": 28245,
+      "local_weekday_median": 94471.0,
+      "ratio": 0.299
+    },
+    {
+      "date": "2026-01-25",
+      "rides": 3050,
+      "local_weekday_median": 27336.5,
+      "ratio": 0.112
+    },
+    {
+      "date": "2026-01-26",
+      "rides": 6037,
+      "local_weekday_median": 42662.5,
+      "ratio": 0.142
+    },
+    {
+      "date": "2026-01-27",
+      "rides": 16066,
+      "local_weekday_median": 55582.0,
+      "ratio": 0.289
+    },
+    {
+      "date": "2026-01-28",
+      "rides": 20596,
+      "local_weekday_median": 55975.5,
+      "ratio": 0.368
+    },
+    {
+      "date": "2026-01-29",
+      "rides": 22426,
+      "local_weekday_median": 64884.0,
+      "ratio": 0.346
+    },
+    {
+      "date": "2026-01-30",
+      "rides": 20369,
+      "local_weekday_median": 62874.0,
+      "ratio": 0.324
+    },
+    {
+      "date": "2026-01-31",
+      "rides": 18374,
+      "local_weekday_median": 48246.5,
+      "ratio": 0.381
+    },
+    {
+      "date": "2026-02-07",
+      "rides": 18703,
+      "local_weekday_median": 52227.5,
+      "ratio": 0.358
+    },
+    {
+      "date": "2026-02-22",
+      "rides": 19008,
+      "local_weekday_median": 48812.5,
+      "ratio": 0.389
+    },
+    {
+      "date": "2026-02-23",
+      "rides": 0,
+      "local_weekday_median": 49073.0,
+      "ratio": 0.0
+    },
+    {
+      "date": "2026-02-24",
+      "rides": 13095,
+      "local_weekday_median": 57548.5,
+      "ratio": 0.228
+    },
+    {
+      "date": "2026-02-25",
+      "rides": 28453,
+      "local_weekday_median": 71789.5,
+      "ratio": 0.396
+    },
+    {
+      "date": "2026-04-25",
+      "rides": 39048,
+      "local_weekday_median": 131812.0,
+      "ratio": 0.296
+    },
+    {
+      "date": "2026-05-23",
+      "rides": 52739,
+      "local_weekday_median": 162337.0,
+      "ratio": 0.325
+    },
+    {
+      "date": "2026-05-24",
+      "rides": 42610,
+      "local_weekday_median": 162088.0,
+      "ratio": 0.263
+    },
+    {
+      "date": "2026-07-06",
+      "rides": 63896,
+      "local_weekday_median": 172481.0,
+      "ratio": 0.37
+    },
+    {
+      "date": "2026-09-26",
+      "rides": 63053,
+      "local_weekday_median": 192552.5,
+      "ratio": 0.327
+    },
+    {
+      "date": "2026-09-27",
+      "rides": 33299,
+      "local_weekday_median": 140392.0,
+      "ratio": 0.237
+    }
+  ],
+  "days": [
+    "2025-12-14",
+    "2025-12-25",
+    "2025-12-26",
+    "2025-12-27",
+    "2026-01-01",
+    "2026-01-25",
+    "2026-01-26",
+    "2026-01-27",
+    "2026-01-28",
+    "2026-01-29",
+    "2026-01-30",
+    "2026-01-31",
+    "2026-02-07",
+    "2026-02-22",
+    "2026-02-23",
+    "2026-02-24",
+    "2026-02-25",
+    "2026-04-25",
+    "2026-05-23",
+    "2026-05-24",
+    "2026-07-06",
+    "2026-09-26",
+    "2026-09-27"
+  ]
+}

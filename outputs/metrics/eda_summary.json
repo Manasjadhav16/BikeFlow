@@ -8,6 +8,7 @@
     "2025-11",
     "2025-12",
     "2026-01",
+    "2026-02",
     "2026-03",
     "2026-04",
     "2026-05",
@@ -16,19 +17,18 @@
     "2026-08",
     "2026-09"
   ],
-  "quarantined_months": [
-    "2026-02"
-  ],
-  "rows": 27279614,
+  "quarantined_months": [],
+  "rows": 28506950,
   "stations": 2531,
-  "days": 337,
-  "total_departures": 44127978,
-  "total_arrivals": 44016323,
+  "days": 364,
+  "total_departures": 45346106,
+  "total_arrivals": 45226770,
   "rides_per_month": {
     "2025-10": 4728471,
     "2025-11": 3413513,
     "2025-12": 2090075,
-    "2026-01": 1814170,
+    "2026-01": 1814273,
+    "2026-02": 1218025,
     "2026-03": 2943012,
     "2026-04": 3857666,
     "2026-05": 4691642,
@@ -37,254 +37,254 @@
     "2026-08": 5241197,
     "2026-09": 4978351
   },
-  "dense_grid_rows": 81882912,
-  "sparsity_nonzero_share": 0.3332,
+  "dense_grid_rows": 88443264,
+  "sparsity_nonzero_share": 0.3223,
   "cross_file_duplicate_rides_counted_once": 495,
   "dropped_edge_rides": {
     "note": "clean rides whose start (departure) or end (arrival) falls outside the loaded months",
-    "departures": 1028,
+    "departures": 618,
     "arrivals": 0
   },
   "busiest_stations": [
     {
       "station_id": "6140.05",
       "name": "W 21 St & 6 Ave",
-      "departures": 159144,
-      "arrivals": 159551,
-      "trips": 318695
+      "departures": 164553,
+      "arrivals": 164950,
+      "trips": 329503
     },
     {
       "station_id": "6233.04",
       "name": "Pier 61 at Chelsea Piers",
-      "departures": 147433,
-      "arrivals": 147529,
-      "trips": 294962
+      "departures": 152840,
+      "arrivals": 152959,
+      "trips": 305799
     },
     {
       "station_id": "6331.01",
       "name": "W 31 St & 7 Ave",
-      "departures": 133522,
-      "arrivals": 133187,
-      "trips": 266709
+      "departures": 138001,
+      "arrivals": 137636,
+      "trips": 275637
     },
     {
       "station_id": "6492.08",
       "name": "9 Ave & W 33 St",
-      "departures": 131823,
-      "arrivals": 132621,
-      "trips": 264444
+      "departures": 136044,
+      "arrivals": 136804,
+      "trips": 272848
     },
     {
       "station_id": "5980.10",
       "name": "E 17 St & Broadway",
-      "departures": 129544,
-      "arrivals": 130282,
-      "trips": 259826
+      "departures": 133351,
+      "arrivals": 134149,
+      "trips": 267500
     },
     {
       "station_id": "5905.12",
       "name": "Broadway & E 14 St",
-      "departures": 129851,
-      "arrivals": 129810,
-      "trips": 259661
+      "departures": 133762,
+      "arrivals": 133685,
+      "trips": 267447
     },
     {
       "station_id": "6948.10",
       "name": "Broadway & W 58 St",
-      "departures": 123672,
-      "arrivals": 122525,
-      "trips": 246197
+      "departures": 127072,
+      "arrivals": 125816,
+      "trips": 252888
     },
     {
       "station_id": "5905.14",
       "name": "University Pl & E 14 St",
-      "departures": 122539,
-      "arrivals": 123302,
-      "trips": 245841
+      "departures": 125810,
+      "arrivals": 126571,
+      "trips": 252381
     },
     {
       "station_id": "6726.01",
       "name": "11 Ave & W 41 St",
-      "departures": 117858,
-      "arrivals": 117536,
-      "trips": 235394
+      "departures": 122206,
+      "arrivals": 121898,
+      "trips": 244104
     },
     {
       "station_id": "6432.09",
       "name": "Park Ave & E 42 St",
-      "departures": 117337,
-      "arrivals": 118025,
-      "trips": 235362
-    },
-    {
-      "station_id": "6173.08",
-      "name": "Broadway & W 25 St",
-      "departures": 115738,
-      "arrivals": 116036,
-      "trips": 231774
+      "departures": 120420,
+      "arrivals": 121110,
+      "trips": 241530
     },
     {
       "station_id": "6364.07",
       "name": "6 Ave & W 33 St",
-      "departures": 116508,
-      "arrivals": 115230,
-      "trips": 231738
+      "departures": 119712,
+      "arrivals": 118462,
+      "trips": 238174
+    },
+    {
+      "station_id": "6173.08",
+      "name": "Broadway & W 25 St",
+      "departures": 118911,
+      "arrivals": 119196,
+      "trips": 238107
     },
     {
       "station_id": "6912.01",
       "name": "7 Ave & Central Park South",
-      "departures": 113555,
-      "arrivals": 112225,
-      "trips": 225780
+      "departures": 115971,
+      "arrivals": 114600,
+      "trips": 230571
     },
     {
       "station_id": "5374.01",
       "name": "Norfolk St & Broome St",
-      "departures": 110547,
-      "arrivals": 111468,
-      "trips": 222015
+      "departures": 114176,
+      "arrivals": 115084,
+      "trips": 229260
     },
     {
       "station_id": "5492.05",
       "name": "Cleveland Pl & Spring St",
-      "departures": 110758,
-      "arrivals": 111100,
-      "trips": 221858
+      "departures": 113749,
+      "arrivals": 114080,
+      "trips": 227829
     }
   ],
   "hourly_profile_avg_departures_per_day": [
     {
       "hour": 0,
-      "weekday": 1465.0,
-      "weekend": 3184.6
+      "weekday": 1386.1,
+      "weekend": 3007.6
     },
     {
       "hour": 1,
-      "weekday": 764.1,
-      "weekend": 2251.6
+      "weekday": 721.8,
+      "weekend": 2123.0
     },
     {
       "hour": 2,
-      "weekday": 443.3,
-      "weekend": 1497.6
+      "weekday": 419.2,
+      "weekend": 1414.8
     },
     {
       "hour": 3,
-      "weekday": 293.2,
-      "weekend": 985.4
+      "weekday": 278.2,
+      "weekend": 933.2
     },
     {
       "hour": 4,
-      "weekday": 378.6,
-      "weekend": 662.8
+      "weekday": 362.5,
+      "weekend": 630.2
     },
     {
       "hour": 5,
-      "weekday": 1162.4,
-      "weekend": 522.3
+      "weekday": 1117.1,
+      "weekend": 499.1
     },
     {
       "hour": 6,
-      "weekday": 3274.5,
-      "weekend": 977.1
+      "weekday": 3132.7,
+      "weekend": 933.2
     },
     {
       "hour": 7,
-      "weekday": 6662.3,
-      "weekend": 1794.4
+      "weekday": 6360.1,
+      "weekend": 1709.8
     },
     {
       "hour": 8,
-      "weekday": 10402.6,
-      "weekend": 3131.3
+      "weekday": 9922.4,
+      "weekend": 2986.7
     },
     {
       "hour": 9,
-      "weekday": 7706.0,
-      "weekend": 4931.3
+      "weekday": 7342.7,
+      "weekend": 4698.0
     },
     {
       "hour": 10,
-      "weekday": 5448.7,
-      "weekend": 6566.2
+      "weekday": 5187.0,
+      "weekend": 6244.4
     },
     {
       "hour": 11,
-      "weekday": 5483.2,
-      "weekend": 7760.2
+      "weekday": 5218.6,
+      "weekend": 7372.2
     },
     {
       "hour": 12,
-      "weekday": 6158.3,
-      "weekend": 8631.0
+      "weekday": 5861.0,
+      "weekend": 8197.5
     },
     {
       "hour": 13,
-      "weekday": 6599.9,
-      "weekend": 9031.9
+      "weekday": 6287.0,
+      "weekend": 8580.4
     },
     {
       "hour": 14,
-      "weekday": 7335.0,
-      "weekend": 9062.4
+      "weekday": 6994.3,
+      "weekend": 8619.0
     },
     {
       "hour": 15,
-      "weekday": 8269.6,
-      "weekend": 9077.3
+      "weekday": 7890.7,
+      "weekend": 8630.3
     },
     {
       "hour": 16,
-      "weekday": 9862.0,
-      "weekend": 8863.9
+      "weekday": 9410.0,
+      "weekend": 8420.2
     },
     {
       "hour": 17,
-      "weekday": 13501.3,
-      "weekend": 8477.6
+      "weekday": 12871.2,
+      "weekend": 8049.6
     },
     {
       "hour": 18,
-      "weekday": 12579.9,
-      "weekend": 8090.4
+      "weekday": 11967.5,
+      "weekend": 7654.0
     },
     {
       "hour": 19,
-      "weekday": 9436.5,
-      "weekend": 6884.6
+      "weekday": 8973.9,
+      "weekend": 6497.6
     },
     {
       "hour": 20,
-      "weekday": 6763.7,
-      "weekend": 5157.2
+      "weekday": 6426.1,
+      "weekend": 4866.4
     },
     {
       "hour": 21,
-      "weekday": 5105.7,
-      "weekend": 4038.3
+      "weekday": 4849.8,
+      "weekend": 3812.8
     },
     {
       "hour": 22,
-      "weekday": 4108.0,
-      "weekend": 3412.7
+      "weekday": 3899.1,
+      "weekend": 3226.2
     },
     {
       "hour": 23,
-      "weekday": 2979.9,
-      "weekend": 2797.2
+      "weekday": 2827.2,
+      "weekend": 2648.6
     }
   ],
   "weekday_vs_weekend": {
     "weekday": {
-      "days": 241,
-      "total_departures": 32820230,
-      "avg_departures_per_day": 136183.5,
+      "days": 260,
+      "total_departures": 33723593,
+      "avg_departures_per_day": 129706.1,
       "peak_hour": 17
     },
     "weekend": {
-      "days": 96,
-      "total_departures": 11307748,
-      "avg_departures_per_day": 117789.0,
+      "days": 104,
+      "total_departures": 11622513,
+      "avg_departures_per_day": 111754.9,
       "peak_hour": 15
     }
   },
@@ -294,107 +294,132 @@
       {
         "station_id": "6756.01",
         "name": "W 43 St & 10 Ave",
-        "am_net_outflow": 57.9
+        "am_net_outflow": 56.2
       },
       {
         "station_id": "5659.05",
         "name": "E 10 St & Ave A",
-        "am_net_outflow": 46.0
+        "am_net_outflow": 43.7
       },
       {
         "station_id": "7183.03",
         "name": "Riverside Blvd & W 67 St",
-        "am_net_outflow": 44.4
+        "am_net_outflow": 42.2
       },
       {
         "station_id": "6756.05",
         "name": "W 44 St & 11 Ave",
-        "am_net_outflow": 43.6
+        "am_net_outflow": 41.6
       },
       {
         "station_id": "6230.04",
         "name": "FDR Drive & E 35 St",
-        "am_net_outflow": 43.6
+        "am_net_outflow": 40.8
       },
       {
         "station_id": "5515.02",
         "name": "E 2 St & Ave B",
-        "am_net_outflow": 42.5
+        "am_net_outflow": 40.5
       },
       {
         "station_id": "5584.04",
         "name": "E 6 St & Ave B",
-        "am_net_outflow": 42.0
+        "am_net_outflow": 39.8
       },
       {
         "station_id": "5335.07",
         "name": "Grand St & Samuel Dickstein Plaza",
-        "am_net_outflow": 41.7
-      },
-      {
-        "station_id": "5626.15",
-        "name": "1 Ave & E 6 St",
-        "am_net_outflow": 35.7
+        "am_net_outflow": 39.7
       },
       {
         "station_id": "5476.03",
         "name": "E 2 St & Ave C",
-        "am_net_outflow": 35.5
+        "am_net_outflow": 34.0
+      },
+      {
+        "station_id": "5886.13",
+        "name": "E 20 St & FDR Dr",
+        "am_net_outflow": 34.0
       }
     ],
     "top_filling": [
       {
         "station_id": "6492.08",
         "name": "9 Ave & W 33 St",
-        "am_net_outflow": -106.2
+        "am_net_outflow": -101.3
       },
       {
         "station_id": "6584.12",
         "name": "E 47 St & Park Ave",
-        "am_net_outflow": -73.5
+        "am_net_outflow": -71.0
       },
       {
         "station_id": "5470.10",
         "name": "Greenwich St & Hubert St",
-        "am_net_outflow": -68.1
+        "am_net_outflow": -64.2
       },
       {
         "station_id": "6173.08",
         "name": "Broadway & W 25 St",
-        "am_net_outflow": -65.3
+        "am_net_outflow": -61.9
       },
       {
         "station_id": "4804.02",
         "name": "Dock 72 Way & Market St",
-        "am_net_outflow": -63.2
+        "am_net_outflow": -59.9
       },
       {
         "station_id": "5470.12",
         "name": "North Moore St & Greenwich St",
-        "am_net_outflow": -57.4
+        "am_net_outflow": -57.0
       },
       {
         "station_id": "6474.11",
         "name": "E 40 St & 5 Ave",
-        "am_net_outflow": -55.1
+        "am_net_outflow": -52.5
       },
       {
         "station_id": "6822.09",
         "name": "1 Ave & E 68 St",
-        "am_net_outflow": -53.6
+        "am_net_outflow": -51.6
       },
       {
         "station_id": "5980.11",
         "name": "Broadway & E 19 St",
-        "am_net_outflow": -52.7
+        "am_net_outflow": -49.7
       },
       {
         "station_id": "6578.01",
         "name": "W 34 St & 11 Ave",
-        "am_net_outflow": -49.6
+        "am_net_outflow": -47.8
       }
     ]
   },
+  "disrupted_days": [
+    "2025-12-14",
+    "2025-12-25",
+    "2025-12-26",
+    "2025-12-27",
+    "2026-01-01",
+    "2026-01-25",
+    "2026-01-26",
+    "2026-01-27",
+    "2026-01-28",
+    "2026-01-29",
+    "2026-01-30",
+    "2026-01-31",
+    "2026-02-07",
+    "2026-02-22",
+    "2026-02-23",
+    "2026-02-24",
+    "2026-02-25",
+    "2026-04-25",
+    "2026-05-23",
+    "2026-05-24",
+    "2026-07-06",
+    "2026-09-26",
+    "2026-09-27"
+  ],
   "busiest_day": {
     "date": "2026-09-18",
     "departures": "212270"

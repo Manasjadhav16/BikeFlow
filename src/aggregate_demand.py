@@ -36,6 +36,12 @@ BUCKET = "15 minutes"
 PARTS_DIR = DATA_PROCESSED / "demand_parts"
 DEMAND_MARKER = "_BIKEFLOW_DEMAND"
 PROGRESS_JSON = METRICS_DIR / "build_progress.json"
+DISRUPTED_JSON = METRICS_DIR / "disrupted_days.json"
+# Disruptions confirmed by inspection (docs/data_notes.md §7). Times are NYC local.
+MANUAL_WINDOWS = [("2026-02-22 20:00:00", "2026-02-24 06:00:00")]  # system-wide shutdown
+MANUAL_DAYS = ["2026-01-25", "2026-09-27"]
+DISRUPTED_RATIO = 0.4   # day rides < 40% of the local same-weekday median
+DISRUPTED_WEEKS = 4     # median over the same weekday within +-4 weeks (excluding the day)
 WEEKDAY_COLOR, WEEKEND_COLOR = "#2a78d6", "#eb6834"
 INK, INK_MUTED, GRID = "#0b0b0b", "#52514e", "#e4e3df"
 GRID_LINE = "#a9a8a2"  # muted line for raw daily values under the 7-day mean
@@ -63,7 +69,44 @@ def record_progress(rec: dict) -> None:
     write_json(PROGRESS_JSON, log)
 
 
-def demand_month(spark, ym: str, available: list[str]) -> int:
+def compute_disrupted(spark, months: list[str]) -> dict:
+    """Disrupted days: manual windows/days plus any day with rides below DISRUPTED_RATIO of the
+    median of the same weekday within +-DISRUPTED_WEEKS weeks. The median is local, not
+    year-wide: a year-wide weekday median flags ordinary winter days (50 days, 20 of them in
+    February) instead of disruptions."""
+    parts = [spark.read.parquet(str(month_path(TRIPS_CLEAN_DIR, m)))
+             .groupBy(F.to_date("started_at").alias("date")).count().toPandas() for m in months]  # <=32 rows each
+    days = pd.date_range(months[0] + "-01", pd.Timestamp(months[-1] + "-01") + pd.offsets.MonthEnd(0))
+    rides = pd.concat(parts).assign(date=lambda x: pd.to_datetime(x["date"])).groupby("date")["count"].sum()
+    rides = rides.reindex(days, fill_value=0)
+    auto = []
+    for t in days:
+        nb = [t + pd.Timedelta(weeks=k) for k in range(-DISRUPTED_WEEKS, DISRUPTED_WEEKS + 1) if k]
+        med = rides[[x for x in nb if x in rides.index]].median()
+        if med > 0 and rides[t] < DISRUPTED_RATIO * med:
+            auto.append({"date": str(t.date()), "rides": int(rides[t]), "local_weekday_median": float(med),
+                         "ratio": round(float(rides[t] / med), 3)})
+    spec = {
+        "rule": f"day rides < {DISRUPTED_RATIO:.0%} of the median of the same weekday within "
+                f"+-{DISRUPTED_WEEKS} weeks (day itself excluded); plus manual windows/days",
+        "manual_windows": [list(w) for w in MANUAL_WINDOWS],
+        "manual_days": MANUAL_DAYS,
+        "auto_days": auto,
+        "days": sorted(set(MANUAL_DAYS) | {a["date"] for a in auto}),
+    }
+    write_json(DISRUPTED_JSON, spec)
+    return spec
+
+
+def disrupted_col(col: str, spec: dict):
+    """True if the 15-min bucket starting at `col` is in a disrupted window or day (NYC time)."""
+    flag = F.to_date(col).isin(spec["days"])
+    for lo, hi in spec["manual_windows"]:
+        flag = flag | ((F.col(col) >= F.to_timestamp(F.lit(lo))) & (F.col(col) < F.to_timestamp(F.lit(hi))))
+    return flag
+
+
+def demand_month(spark, ym: str, available: list[str], spec: dict) -> int:
     """Build demand_15min for one target month and its small EDA parts. Returns demand rows."""
     sources = [str(month_path(TRIPS_CLEAN_DIR, m)) for m in (shift(ym, -1), ym, shift(ym, 1)) if m in available]
     trips = spark.read.option("basePath", str(TRIPS_CLEAN_DIR)).parquet(*sources)
@@ -93,10 +136,11 @@ def demand_month(spark, ym: str, available: list[str]) -> int:
         .withColumn("hour", F.hour("bucket_start"))
         .withColumn("day_of_week", dow)
         .withColumn("is_weekend", dow >= 6)
+        .withColumn("disrupted_day", disrupted_col("bucket_start", spec))
         .withColumn("year", F.lit(int(ym[:4])))
         .withColumn("month", F.lit(int(ym[5:])))
         .select("station_id", "bucket_start", "departures", "arrivals", "net_outflow",
-                "hour", "day_of_week", "month", "is_weekend", "year")
+                "hour", "day_of_week", "month", "is_weekend", "disrupted_day", "year")
     )
     demand.write.mode("overwrite").partitionBy("year", "month").parquet(str(DEMAND_DIR))
 
@@ -195,6 +239,7 @@ def finalize(months: list[str]) -> dict:
             "top_filling": by_station.nsmallest(10, "am_net_outflow")[am_cols]
             .assign(am_net_outflow=lambda x: (x["am_net_outflow"] / am_days).round(1)).to_dict("records"),
         },
+        "disrupted_days": read_json(DISRUPTED_JSON).get("days", []),
         "busiest_day": {k: str(v) for k, v in daily.loc[daily["departures"].idxmax(), ["date", "departures"]].items()},
         "quietest_day": {k: str(v) for k, v in daily.loc[daily["departures"].idxmin(), ["date", "departures"]].items()},
     }
@@ -325,11 +370,13 @@ def main() -> None:
             spark = get_spark("bikeflow-demand")
             spark.conf.set("spark.sql.sources.partitionOverwriteMode", "dynamic")
             try:
+                spec = compute_disrupted(spark, available)
+                print(f"disrupted days: {len(spec['days'])} + windows {spec['manual_windows']}", flush=True)
                 for m in todo:
                     check_disk(f"demand {m}")
                     t0 = time.time()
                     with ResourceMonitor(spark) as mon:
-                        rows = demand_month(spark, m, available)
+                        rows = demand_month(spark, m, available, spec)
                     record_progress(log_progress("demand", m, rows, time.time() - t0, mon))
             finally:
                 stop_spark(spark)

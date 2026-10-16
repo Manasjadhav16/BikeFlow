@@ -1,0 +1,374 @@
+{
+  "definition": "strong drain: predicted change next 30 min <= -X; strong fill: >= +X; scored against the actual change with the same X; disrupted rows excluded",
+  "thresholds": [
+    3,
+    5,
+    8
+  ],
+  "best_model": "random_forest",
+  "caveat": "Flow alerts only. Empty/full-station alerts need live bikes/docks available (GBFS station_status) and are built in Stage 3.",
+  "validation": {
+    "month": "2026-08",
+    "rows": 7049957,
+    "reference_always_zero": {
+      "mae": 0.9995,
+      "rmse": 2.1079
+    },
+    "strong_drain_X3": {
+      "actual_events": 401713,
+      "actual_rate": 0.05698,
+      "persistence": {
+        "alerts": 401862,
+        "precision": 0.2405,
+        "recall": 0.2406
+      },
+      "hist_avg": {
+        "alerts": 46304,
+        "precision": 0.6745,
+        "recall": 0.0777
+      },
+      "linear_regression": {
+        "alerts": 53794,
+        "precision": 0.6425,
+        "recall": 0.086
+      },
+      "random_forest": {
+        "alerts": 43458,
+        "precision": 0.66,
+        "recall": 0.0714
+      },
+      "gbt": {
+        "alerts": 59680,
+        "precision": 0.6064,
+        "recall": 0.0901
+      }
+    },
+    "strong_drain_X5": {
+      "actual_events": 148888,
+      "actual_rate": 0.02112,
+      "persistence": {
+        "alerts": 148963,
+        "precision": 0.2173,
+        "recall": 0.2174
+      },
+      "hist_avg": {
+        "alerts": 16960,
+        "precision": 0.6632,
+        "recall": 0.0755
+      },
+      "linear_regression": {
+        "alerts": 17183,
+        "precision": 0.6891,
+        "recall": 0.0795
+      },
+      "random_forest": {
+        "alerts": 16115,
+        "precision": 0.6442,
+        "recall": 0.0697
+      },
+      "gbt": {
+        "alerts": 17831,
+        "precision": 0.6167,
+        "recall": 0.0739
+      }
+    },
+    "strong_drain_X8": {
+      "actual_events": 46104,
+      "actual_rate": 0.00654,
+      "persistence": {
+        "alerts": 46127,
+        "precision": 0.2115,
+        "recall": 0.2116
+      },
+      "hist_avg": {
+        "alerts": 5476,
+        "precision": 0.6527,
+        "recall": 0.0775
+      },
+      "linear_regression": {
+        "alerts": 5327,
+        "precision": 0.7051,
+        "recall": 0.0815
+      },
+      "random_forest": {
+        "alerts": 4894,
+        "precision": 0.6083,
+        "recall": 0.0646
+      },
+      "gbt": {
+        "alerts": 5508,
+        "precision": 0.5993,
+        "recall": 0.0716
+      }
+    },
+    "strong_fill_X3": {
+      "actual_events": 393849,
+      "actual_rate": 0.05587,
+      "persistence": {
+        "alerts": 394028,
+        "precision": 0.2399,
+        "recall": 0.24
+      },
+      "hist_avg": {
+        "alerts": 43904,
+        "precision": 0.6757,
+        "recall": 0.0753
+      },
+      "linear_regression": {
+        "alerts": 52927,
+        "precision": 0.6352,
+        "recall": 0.0854
+      },
+      "random_forest": {
+        "alerts": 45491,
+        "precision": 0.6911,
+        "recall": 0.0798
+      },
+      "gbt": {
+        "alerts": 50995,
+        "precision": 0.6759,
+        "recall": 0.0875
+      }
+    },
+    "strong_fill_X5": {
+      "actual_events": 150034,
+      "actual_rate": 0.02128,
+      "persistence": {
+        "alerts": 150095,
+        "precision": 0.2254,
+        "recall": 0.2255
+      },
+      "hist_avg": {
+        "alerts": 18316,
+        "precision": 0.698,
+        "recall": 0.0852
+      },
+      "linear_regression": {
+        "alerts": 18608,
+        "precision": 0.7221,
+        "recall": 0.0896
+      },
+      "random_forest": {
+        "alerts": 24355,
+        "precision": 0.6961,
+        "recall": 0.113
+      },
+      "gbt": {
+        "alerts": 28021,
+        "precision": 0.6596,
+        "recall": 0.1232
+      }
+    },
+    "strong_fill_X8": {
+      "actual_events": 48875,
+      "actual_rate": 0.00693,
+      "persistence": {
+        "alerts": 48886,
+        "precision": 0.2292,
+        "recall": 0.2292
+      },
+      "hist_avg": {
+        "alerts": 6756,
+        "precision": 0.7,
+        "recall": 0.0968
+      },
+      "linear_regression": {
+        "alerts": 6560,
+        "precision": 0.7723,
+        "recall": 0.1037
+      },
+      "random_forest": {
+        "alerts": 11747,
+        "precision": 0.675,
+        "recall": 0.1622
+      },
+      "gbt": {
+        "alerts": 13582,
+        "precision": 0.6447,
+        "recall": 0.1792
+      }
+    }
+  },
+  "test": {
+    "month": "2026-09",
+    "rows": 6369678,
+    "reference_always_zero": {
+      "mae": 1.0112,
+      "rmse": 2.215
+    },
+    "strong_drain_X3": {
+      "actual_events": 362607,
+      "actual_rate": 0.05693,
+      "persistence": {
+        "alerts": 362446,
+        "precision": 0.2602,
+        "recall": 0.26
+      },
+      "hist_avg": {
+        "alerts": 48139,
+        "precision": 0.6951,
+        "recall": 0.0923
+      },
+      "linear_regression": {
+        "alerts": 52584,
+        "precision": 0.6774,
+        "recall": 0.0982
+      },
+      "random_forest": {
+        "alerts": 48903,
+        "precision": 0.6774,
+        "recall": 0.0914
+      },
+      "gbt": {
+        "alerts": 65733,
+        "precision": 0.629,
+        "recall": 0.114
+      }
+    },
+    "strong_drain_X5": {
+      "actual_events": 139912,
+      "actual_rate": 0.02197,
+      "persistence": {
+        "alerts": 139864,
+        "precision": 0.2489,
+        "recall": 0.2488
+      },
+      "hist_avg": {
+        "alerts": 18023,
+        "precision": 0.7055,
+        "recall": 0.0909
+      },
+      "linear_regression": {
+        "alerts": 17327,
+        "precision": 0.7375,
+        "recall": 0.0913
+      },
+      "random_forest": {
+        "alerts": 18641,
+        "precision": 0.67,
+        "recall": 0.0893
+      },
+      "gbt": {
+        "alerts": 20683,
+        "precision": 0.6445,
+        "recall": 0.0953
+      }
+    },
+    "strong_drain_X8": {
+      "actual_events": 46876,
+      "actual_rate": 0.00736,
+      "persistence": {
+        "alerts": 46862,
+        "precision": 0.2485,
+        "recall": 0.2484
+      },
+      "hist_avg": {
+        "alerts": 5892,
+        "precision": 0.7043,
+        "recall": 0.0885
+      },
+      "linear_regression": {
+        "alerts": 5367,
+        "precision": 0.7839,
+        "recall": 0.0897
+      },
+      "random_forest": {
+        "alerts": 5856,
+        "precision": 0.6433,
+        "recall": 0.0804
+      },
+      "gbt": {
+        "alerts": 6479,
+        "precision": 0.6354,
+        "recall": 0.0878
+      }
+    },
+    "strong_fill_X3": {
+      "actual_events": 354799,
+      "actual_rate": 0.0557,
+      "persistence": {
+        "alerts": 354515,
+        "precision": 0.2564,
+        "recall": 0.2562
+      },
+      "hist_avg": {
+        "alerts": 45443,
+        "precision": 0.6785,
+        "recall": 0.0869
+      },
+      "linear_regression": {
+        "alerts": 52671,
+        "precision": 0.6503,
+        "recall": 0.0965
+      },
+      "random_forest": {
+        "alerts": 48156,
+        "precision": 0.6944,
+        "recall": 0.0942
+      },
+      "gbt": {
+        "alerts": 53752,
+        "precision": 0.6772,
+        "recall": 0.1026
+      }
+    },
+    "strong_fill_X5": {
+      "actual_events": 139655,
+      "actual_rate": 0.02192,
+      "persistence": {
+        "alerts": 139589,
+        "precision": 0.2512,
+        "recall": 0.2511
+      },
+      "hist_avg": {
+        "alerts": 19357,
+        "precision": 0.6897,
+        "recall": 0.0956
+      },
+      "linear_regression": {
+        "alerts": 19117,
+        "precision": 0.7217,
+        "recall": 0.0988
+      },
+      "random_forest": {
+        "alerts": 26262,
+        "precision": 0.6972,
+        "recall": 0.1311
+      },
+      "gbt": {
+        "alerts": 30108,
+        "precision": 0.6665,
+        "recall": 0.1437
+      }
+    },
+    "strong_fill_X8": {
+      "actual_events": 48897,
+      "actual_rate": 0.00768,
+      "persistence": {
+        "alerts": 48873,
+        "precision": 0.2598,
+        "recall": 0.2596
+      },
+      "hist_avg": {
+        "alerts": 7264,
+        "precision": 0.6784,
+        "recall": 0.1008
+      },
+      "linear_regression": {
+        "alerts": 6522,
+        "precision": 0.7728,
+        "recall": 0.1031
+      },
+      "random_forest": {
+        "alerts": 12664,
+        "precision": 0.6808,
+        "recall": 0.1763
+      },
+      "gbt": {
+        "alerts": 14443,
+        "precision": 0.6598,
+        "recall": 0.1949
+      }
+    }
+  }
+}

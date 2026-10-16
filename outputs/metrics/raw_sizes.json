@@ -127,7 +127,11 @@
       }
     ],
     "rows": 1219444,
-    "converted_at": "2026-10-16T10:28:07+00:00"
+    "converted_at": "2026-10-16T10:28:07+00:00",
+    "raw_rows": 1219444,
+    "clean_rows": 1217718,
+    "clean_parquet_bytes": 45322176,
+    "raw_parquet_deleted_at": "2026-10-16T15:15:16+00:00"
   },
   "2026-03": {
     "key": "202603-citibike-tripdata.zip",
