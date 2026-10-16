@@ -1,0 +1,97 @@
+{
+  "input_rows": 15222228,
+  "output_rows": 15209951,
+  "rules": [
+    {
+      "rule": "null_or_invalid_timestamp",
+      "before": 15222228,
+      "removed": 0,
+      "after": 15222228
+    },
+    {
+      "rule": "ended_at_not_after_started_at",
+      "before": 15222228,
+      "removed": 0,
+      "after": 15222228
+    },
+    {
+      "rule": "duration_over_24h",
+      "before": 15222228,
+      "removed": 3462,
+      "after": 15218766
+    },
+    {
+      "rule": "null_start_station_id",
+      "before": 15218766,
+      "removed": 8815,
+      "after": 15209951
+    },
+    {
+      "rule": "dedupe_ride_id",
+      "before": 15209951,
+      "removed": 0,
+      "after": 15209951
+    }
+  ],
+  "station_id_normalized": {
+    "start_station_id_one_decimal_padded": 30892,
+    "end_station_id_one_decimal_padded": 238368
+  },
+  "flags": {
+    "end_station_missing": 39859,
+    "end_station_missing_pct": 0.262
+  },
+  "observations": {
+    "null_ride_id_in_output": 0,
+    "started_outside_source_month": 2776,
+    "duration_sec_p50_p95_p99": [
+      576,
+      2083,
+      3714
+    ],
+    "duration_under_60s": 0,
+    "rideable_type": {
+      "classic_bike": 4095821,
+      "electric_bike": 11114130
+    },
+    "member_casual": {
+      "casual": 3081895,
+      "member": 12128056
+    }
+  },
+  "per_source_month": [
+    {
+      "year": 2026,
+      "month": 7,
+      "input": 4993137,
+      "normalized_start_station_id": 9650,
+      "normalized_end_station_id": 70426,
+      "null_or_invalid_timestamp": 0,
+      "ended_at_not_after_started_at": 0,
+      "duration_over_24h": 1129,
+      "null_start_station_id": 3028
+    },
+    {
+      "year": 2026,
+      "month": 8,
+      "input": 5246236,
+      "normalized_start_station_id": 11040,
+      "normalized_end_station_id": 89846,
+      "null_or_invalid_timestamp": 0,
+      "ended_at_not_after_started_at": 0,
+      "duration_over_24h": 1263,
+      "null_start_station_id": 2870
+    },
+    {
+      "year": 2026,
+      "month": 9,
+      "input": 4982855,
+      "normalized_start_station_id": 10202,
+      "normalized_end_station_id": 78096,
+      "null_or_invalid_timestamp": 0,
+      "ended_at_not_after_started_at": 0,
+      "duration_over_24h": 1070,
+      "null_start_station_id": 2917
+    }
+  ]
+}

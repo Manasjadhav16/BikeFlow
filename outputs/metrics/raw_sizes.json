@@ -1,0 +1,96 @@
+{
+  "2026-07": {
+    "key": "202607-citibike-tripdata.zip",
+    "zip_bytes": 974302094,
+    "csv_bytes": 974301392,
+    "parquet_bytes": 174247753,
+    "csv_members": [
+      {
+        "name": "202607-citibike-tripdata_1.csv",
+        "csv_bytes": 195353531
+      },
+      {
+        "name": "202607-citibike-tripdata_2.csv",
+        "csv_bytes": 194991077
+      },
+      {
+        "name": "202607-citibike-tripdata_3.csv",
+        "csv_bytes": 195132448
+      },
+      {
+        "name": "202607-citibike-tripdata_4.csv",
+        "csv_bytes": 194789289
+      },
+      {
+        "name": "202607-citibike-tripdata_5.csv",
+        "csv_bytes": 194035047
+      }
+    ],
+    "rows": 4993137,
+    "converted_at": "2026-10-16T05:05:48+00:00"
+  },
+  "2026-08": {
+    "key": "202608-citibike-tripdata.zip",
+    "zip_bytes": 1024034405,
+    "csv_bytes": 1024033567,
+    "parquet_bytes": 183886689,
+    "csv_members": [
+      {
+        "name": "202608-citibike-tripdata_1.csv",
+        "csv_bytes": 195478065
+      },
+      {
+        "name": "202608-citibike-tripdata_2.csv",
+        "csv_bytes": 195150488
+      },
+      {
+        "name": "202608-citibike-tripdata_3.csv",
+        "csv_bytes": 194775838
+      },
+      {
+        "name": "202608-citibike-tripdata_4.csv",
+        "csv_bytes": 195112950
+      },
+      {
+        "name": "202608-citibike-tripdata_5.csv",
+        "csv_bytes": 195263207
+      },
+      {
+        "name": "202608-citibike-tripdata_6.csv",
+        "csv_bytes": 48253019
+      }
+    ],
+    "rows": 5246236,
+    "converted_at": "2026-10-16T05:24:30+00:00"
+  },
+  "2026-09": {
+    "key": "202609-citibike-tripdata.zip",
+    "zip_bytes": 972151835,
+    "csv_bytes": 972151133,
+    "parquet_bytes": 173861428,
+    "csv_members": [
+      {
+        "name": "202609-citibike-tripdata_1.csv",
+        "csv_bytes": 195316280
+      },
+      {
+        "name": "202609-citibike-tripdata_2.csv",
+        "csv_bytes": 194829358
+      },
+      {
+        "name": "202609-citibike-tripdata_3.csv",
+        "csv_bytes": 194957065
+      },
+      {
+        "name": "202609-citibike-tripdata_4.csv",
+        "csv_bytes": 195271896
+      },
+      {
+        "name": "202609-citibike-tripdata_5.csv",
+        "csv_bytes": 191776534
+      }
+    ],
+    "rows": 4982855,
+    "converted_at": "2026-10-16T05:41:00+00:00"
+  }
+}

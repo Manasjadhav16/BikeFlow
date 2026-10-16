@@ -1,0 +1,381 @@
+{
+  "date_range": [
+    "2026-07-01",
+    "2026-09-30"
+  ],
+  "rows": 8678679,
+  "stations": 2478,
+  "days": 92,
+  "total_departures": 15209115,
+  "total_arrivals": 15170092,
+  "dense_grid_rows": 21885696,
+  "sparsity_nonzero_share": 0.3965,
+  "dropped_edge_buckets": {
+    "rows": 602,
+    "departures": 836,
+    "arrivals": 0
+  },
+  "busiest_stations": [
+    {
+      "station_id": "6233.04",
+      "name": "Pier 61 at Chelsea Piers",
+      "departures": 51874,
+      "arrivals": 51843,
+      "trips": 103717
+    },
+    {
+      "station_id": "6140.05",
+      "name": "W 21 St & 6 Ave",
+      "departures": 51758,
+      "arrivals": 51844,
+      "trips": 103602
+    },
+    {
+      "station_id": "5980.10",
+      "name": "E 17 St & Broadway",
+      "departures": 45310,
+      "arrivals": 45562,
+      "trips": 90872
+    },
+    {
+      "station_id": "6331.01",
+      "name": "W 31 St & 7 Ave",
+      "departures": 45264,
+      "arrivals": 44971,
+      "trips": 90235
+    },
+    {
+      "station_id": "6492.08",
+      "name": "9 Ave & W 33 St",
+      "departures": 44310,
+      "arrivals": 44430,
+      "trips": 88740
+    },
+    {
+      "station_id": "6948.10",
+      "name": "Broadway & W 58 St",
+      "departures": 43269,
+      "arrivals": 42912,
+      "trips": 86181
+    },
+    {
+      "station_id": "5905.12",
+      "name": "Broadway & E 14 St",
+      "departures": 42948,
+      "arrivals": 42768,
+      "trips": 85716
+    },
+    {
+      "station_id": "5905.14",
+      "name": "University Pl & E 14 St",
+      "departures": 41315,
+      "arrivals": 41406,
+      "trips": 82721
+    },
+    {
+      "station_id": "6876.04",
+      "name": "Central Park S & 6 Ave",
+      "departures": 41097,
+      "arrivals": 40539,
+      "trips": 81636
+    },
+    {
+      "station_id": "6432.09",
+      "name": "Park Ave & E 42 St",
+      "departures": 40323,
+      "arrivals": 40566,
+      "trips": 80889
+    },
+    {
+      "station_id": "6726.01",
+      "name": "11 Ave & W 41 St",
+      "departures": 40059,
+      "arrivals": 39871,
+      "trips": 79930
+    },
+    {
+      "station_id": "5712.03",
+      "name": "Cooper Square & Astor Pl",
+      "departures": 39391,
+      "arrivals": 39432,
+      "trips": 78823
+    },
+    {
+      "station_id": "6173.08",
+      "name": "Broadway & W 25 St",
+      "departures": 39269,
+      "arrivals": 39288,
+      "trips": 78557
+    },
+    {
+      "station_id": "6157.04",
+      "name": "10 Ave & W 14 St",
+      "departures": 38829,
+      "arrivals": 39035,
+      "trips": 77864
+    },
+    {
+      "station_id": "6364.07",
+      "name": "6 Ave & W 33 St",
+      "departures": 39177,
+      "arrivals": 38526,
+      "trips": 77703
+    }
+  ],
+  "hourly_profile_avg_departures_per_day": [
+    {
+      "hour": 0,
+      "weekday": 2022.6,
+      "weekend": 4241.0
+    },
+    {
+      "hour": 1,
+      "weekday": 1091.8,
+      "weekend": 3029.4
+    },
+    {
+      "hour": 2,
+      "weekday": 618.7,
+      "weekend": 2102.4
+    },
+    {
+      "hour": 3,
+      "weekday": 397.4,
+      "weekend": 1378.3
+    },
+    {
+      "hour": 4,
+      "weekday": 484.6,
+      "weekend": 920.4
+    },
+    {
+      "hour": 5,
+      "weekday": 1421.6,
+      "weekend": 698.2
+    },
+    {
+      "hour": 6,
+      "weekday": 3989.7,
+      "weekend": 1255.8
+    },
+    {
+      "hour": 7,
+      "weekday": 7706.2,
+      "weekend": 2196.8
+    },
+    {
+      "hour": 8,
+      "weekday": 12455.4,
+      "weekend": 3752.3
+    },
+    {
+      "hour": 9,
+      "weekday": 9630.3,
+      "weekend": 5957.6
+    },
+    {
+      "hour": 10,
+      "weekday": 6772.2,
+      "weekend": 7981.9
+    },
+    {
+      "hour": 11,
+      "weekday": 6862.4,
+      "weekend": 9381.5
+    },
+    {
+      "hour": 12,
+      "weekday": 7773.9,
+      "weekend": 10566.9
+    },
+    {
+      "hour": 13,
+      "weekday": 8248.7,
+      "weekend": 11345.7
+    },
+    {
+      "hour": 14,
+      "weekday": 8847.9,
+      "weekend": 11776.9
+    },
+    {
+      "hour": 15,
+      "weekday": 9825.7,
+      "weekend": 11494.1
+    },
+    {
+      "hour": 16,
+      "weekday": 11935.5,
+      "weekend": 11321.5
+    },
+    {
+      "hour": 17,
+      "weekday": 16589.6,
+      "weekend": 11111.6
+    },
+    {
+      "hour": 18,
+      "weekday": 15619.6,
+      "weekend": 11106.4
+    },
+    {
+      "hour": 19,
+      "weekday": 12327.5,
+      "weekend": 9727.8
+    },
+    {
+      "hour": 20,
+      "weekday": 8898.4,
+      "weekend": 7444.8
+    },
+    {
+      "hour": 21,
+      "weekday": 6873.4,
+      "weekend": 5729.8
+    },
+    {
+      "hour": 22,
+      "weekday": 5671.8,
+      "weekend": 4814.8
+    },
+    {
+      "hour": 23,
+      "weekday": 4010.5,
+      "weekend": 3900.2
+    }
+  ],
+  "weekday_vs_weekend": {
+    "weekday": {
+      "days": 66,
+      "total_departures": 11224978,
+      "avg_departures_per_day": 170075.4,
+      "peak_hour": 17
+    },
+    "weekend": {
+      "days": 26,
+      "total_departures": 3984137,
+      "avg_departures_per_day": 153236.0,
+      "peak_hour": 14
+    }
+  },
+  "weekday_am_peak_7_10": {
+    "note": "avg net_outflow per weekday 07:00-09:59; positive = bikes drain, negative = docks fill",
+    "top_draining": [
+      {
+        "station_id": "6756.01",
+        "name": "W 43 St & 10 Ave",
+        "am_net_outflow": 67.0
+      },
+      {
+        "station_id": "5659.05",
+        "name": "E 10 St & Ave A",
+        "am_net_outflow": 61.1
+      },
+      {
+        "station_id": "7183.03",
+        "name": "Riverside Blvd & W 67 St",
+        "am_net_outflow": 57.1
+      },
+      {
+        "station_id": "6756.05",
+        "name": "W 44 St & 11 Ave",
+        "am_net_outflow": 53.9
+      },
+      {
+        "station_id": "6230.04",
+        "name": "FDR Drive & E 35 St",
+        "am_net_outflow": 53.6
+      },
+      {
+        "station_id": "5515.02",
+        "name": "E 2 St & Ave B",
+        "am_net_outflow": 50.9
+      },
+      {
+        "station_id": "5584.04",
+        "name": "E 6 St & Ave B",
+        "am_net_outflow": 50.7
+      },
+      {
+        "station_id": "5335.07",
+        "name": "Grand St & Samuel Dickstein Plaza",
+        "am_net_outflow": 48.7
+      },
+      {
+        "station_id": "5779.09",
+        "name": "E 13 St & Ave A",
+        "am_net_outflow": 48.2
+      },
+      {
+        "station_id": "7023.04",
+        "name": "W 59 St & 10 Ave",
+        "am_net_outflow": 46.2
+      }
+    ],
+    "top_filling": [
+      {
+        "station_id": "6492.08",
+        "name": "9 Ave & W 33 St",
+        "am_net_outflow": -121.5
+      },
+      {
+        "station_id": "6584.12",
+        "name": "E 47 St & Park Ave",
+        "am_net_outflow": -96.4
+      },
+      {
+        "station_id": "5470.10",
+        "name": "Greenwich St & Hubert St",
+        "am_net_outflow": -78.6
+      },
+      {
+        "station_id": "6173.08",
+        "name": "Broadway & W 25 St",
+        "am_net_outflow": -78.0
+      },
+      {
+        "station_id": "4804.02",
+        "name": "Dock 72 Way & Market St",
+        "am_net_outflow": -77.4
+      },
+      {
+        "station_id": "5730.08",
+        "name": "Greenwich St & W Houston St",
+        "am_net_outflow": -73.1
+      },
+      {
+        "station_id": "6432.11",
+        "name": "E 40 St & Park Ave",
+        "am_net_outflow": -70.4
+      },
+      {
+        "station_id": "5980.11",
+        "name": "Broadway & E 19 St",
+        "am_net_outflow": -70.2
+      },
+      {
+        "station_id": "6474.11",
+        "name": "E 40 St & 5 Ave",
+        "am_net_outflow": -67.8
+      },
+      {
+        "station_id": "6498.10",
+        "name": "E 47 St & 2 Ave",
+        "am_net_outflow": -62.3
+      }
+    ]
+  },
+  "busiest_day": {
+    "date": "2026-09-18",
+    "departures": "212270"
+  },
+  "quietest_day": {
+    "date": "2026-09-27",
+    "departures": "33299"
+  },
+  "charts": [
+    "/Users/manasjadhav/Desktop/BikeFlow/outputs/charts/hourly_profile_weekday_vs_weekend.png",
+    "/Users/manasjadhav/Desktop/BikeFlow/outputs/charts/busiest_stations.png",
+    "/Users/manasjadhav/Desktop/BikeFlow/outputs/charts/daily_departures.png"
+  ]
+}
