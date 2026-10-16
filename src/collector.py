@@ -13,9 +13,15 @@ de-duplication state (station -> last_reported) is saved at every flush, so a re
 rewrite every station. station_information.json is saved at start and every 24 h to
 data/live/station_info/.
 
+Optional --kafka: also publish every NEW station row (the same rows that are written to Parquet)
+as a JSON message to the Kafka topic station_status (key = station_id, Kafka timestamp and
+"event_time" = last_reported). Kafka problems are logged and never stop Parquet collection.
+
     python -m src.collector --once            # one poll + flush (test)
     python -m src.collector --max-minutes 10  # bounded run
     python -m src.collector                   # until Ctrl+C / SIGTERM
+    python -m src.collector --kafka           # + publish to Kafka (localhost:9092)
+    python -m src.collector --data-dir data/test_live --max-minutes 90   # test copy, own health log
 """
 import argparse
 import json
@@ -24,6 +30,7 @@ import signal
 import threading
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -63,7 +70,13 @@ def iso(dt: datetime) -> str:
 
 
 class Collector:
-    def __init__(self):
+    def __init__(self, data_dir: Path = LIVE_DIR, kafka: dict | None = None):
+        self.status_dir, self.info_dir = data_dir / "status", data_dir / "station_info"
+        self.state_json = data_dir / "collector_state.json"
+        # A non-default data dir is a test copy: keep its health log next to it, not in outputs/metrics.
+        self.health_jsonl = HEALTH_JSONL if data_dir == LIVE_DIR else data_dir / "collector_health.jsonl"
+        self.kafka_cfg, self.producer = kafka, None
+        self.kafka_stats = {"sent": 0, "delivered": 0, "failed": 0, "dropped": 0}
         self.stop = threading.Event()
         self.session = requests.Session()
         self.session.headers.update(HEADERS)
@@ -73,9 +86,9 @@ class Collector:
         self.feed_last_updated: int | None = None
         self.interval = POLL_S
         self.totals = {"polls": 0, "ok_polls": 0, "rows_written": 0, "rows_skipped": 0, "files": 0}
-        if STATE_JSON.exists():
+        if self.state_json.exists():
             try:
-                st = json.loads(STATE_JSON.read_text())
+                st = json.loads(self.state_json.read_text())
                 self.last_reported = {k: int(v) for k, v in st.get("last_reported", {}).items()}
                 self.feed_last_updated = st.get("feed_last_updated")
             except (ValueError, OSError):
@@ -112,8 +125,8 @@ class Collector:
 
     # ---------- logging / storage ----------
     def log(self, rec: dict) -> None:
-        HEALTH_JSONL.parent.mkdir(parents=True, exist_ok=True)
-        with open(HEALTH_JSONL, "a") as f:
+        self.health_jsonl.parent.mkdir(parents=True, exist_ok=True)
+        with open(self.health_jsonl, "a") as f:
             f.write(json.dumps({"time": iso(utcnow()), **rec}) + "\n")
 
     def save_station_info(self) -> None:
@@ -124,8 +137,8 @@ class Collector:
         if d is None:
             self.log({"event": "station_info_failed", **meta})
             return
-        INFO_DIR.mkdir(parents=True, exist_ok=True)
-        path = INFO_DIR / f"station_information_{utcnow():%Y%m%dT%H%M%SZ}.json"
+        self.info_dir.mkdir(parents=True, exist_ok=True)
+        path = self.info_dir / f"station_information_{utcnow():%Y%m%dT%H%M%SZ}.json"
         path.write_text(json.dumps(d))
         self.log({"event": "station_info_saved", "file": path.name,
                   "stations": len(d.get("data", {}).get("stations", [])), **meta})
@@ -136,7 +149,7 @@ class Collector:
             for row in self.buffer:
                 groups.setdefault((row["fetched_at"][:10], row["fetched_at"][11:13]), []).append(row)
             for (day, hour), rows in groups.items():
-                d = STATUS_DIR / f"date={day}" / f"hour={hour}"
+                d = self.status_dir / f"date={day}" / f"hour={hour}"
                 d.mkdir(parents=True, exist_ok=True)
                 tmp = d / f".part-{stamp:%Y%m%dT%H%M%S}-{os.getpid()}.parquet.tmp"
                 pq.write_table(pa.Table.from_pylist(rows, schema=SCHEMA), tmp, compression="zstd")
@@ -144,9 +157,44 @@ class Collector:
                 self.totals["files"] += 1
             self.totals["rows_written"] += len(self.buffer)
             self.buffer = []
-        STATE_JSON.parent.mkdir(parents=True, exist_ok=True)
-        STATE_JSON.write_text(json.dumps({"saved_at": iso(utcnow()), "feed_last_updated": self.feed_last_updated,
+        self.state_json.parent.mkdir(parents=True, exist_ok=True)
+        self.state_json.write_text(json.dumps({"saved_at": iso(utcnow()), "feed_last_updated": self.feed_last_updated,
                                           "last_reported": self.last_reported}))
+
+    # ---------- optional Kafka publishing ----------
+    def kafka_start(self) -> None:
+        if not self.kafka_cfg:
+            return
+        try:
+            from confluent_kafka import Producer  # imported only with --kafka
+            self.producer = Producer({
+                "bootstrap.servers": self.kafka_cfg["bootstrap"], "client.id": "bikeflow-collector",
+                "broker.address.family": "v4",  # "localhost" resolves to IPv6 first; the broker is IPv4
+                "linger.ms": 200, "acks": "1", "compression.type": "zstd",
+                "queue.buffering.max.messages": 200_000, "message.timeout.ms": 30_000,
+            })
+            self.log({"event": "kafka_connected", **self.kafka_cfg})
+        except Exception as e:  # missing library or bad config: keep collecting Parquet
+            self.producer = None
+            self.log({"event": "kafka_unavailable", "error": f"{type(e).__name__}: {str(e)[:200]}"})
+
+    def _delivered(self, err, _msg) -> None:
+        self.kafka_stats["failed" if err else "delivered"] += 1
+
+    def kafka_publish(self, row: dict) -> None:
+        if self.producer is None:
+            return
+        msg = dict(row, event_time=iso(datetime.fromtimestamp(row["last_reported"], timezone.utc)),
+                   source="collector")
+        try:
+            self.producer.produce(self.kafka_cfg["topic"], key=row["station_id"], value=json.dumps(msg),
+                                  timestamp=row["last_reported"] * 1000, on_delivery=self._delivered)
+            self.kafka_stats["sent"] += 1
+        except BufferError:  # local queue full (broker down for a long time): drop, keep going
+            self.kafka_stats["dropped"] += 1
+        except Exception:  # never let Kafka break collection
+            self.kafka_stats["dropped"] += 1
+        self.producer.poll(0)
 
     # ---------- one poll ----------
     def poll(self) -> None:
@@ -184,12 +232,16 @@ class Collector:
                 for f in BOOL_FIELDS:
                     row[f] = None if s.get(f) is None else bool(s[f])
                 self.buffer.append(row)
+                self.kafka_publish(row)
                 rec["rows_kept"] += 1
             self.totals["rows_skipped"] += rec["rows_skipped"]
             self.totals["ok_polls"] += 1
         except (KeyError, TypeError, ValueError) as e:  # malformed payload: log and move on
             rec.update(event="poll_bad_payload", error=f"{type(e).__name__}: {str(e)[:200]}")
         finally:
+            if self.producer is not None:
+                self.producer.poll(0)
+                rec["kafka"] = dict(self.kafka_stats)
             self.log(rec)
 
     # ---------- main loop ----------
@@ -200,7 +252,9 @@ class Collector:
             if self.stop.wait(60):
                 return
         self.log({"event": "start", "pid": os.getpid(), "urls": self.urls, "once": once,
-                  "max_minutes": max_minutes, "restored_stations": len(self.last_reported)})
+                  "max_minutes": max_minutes, "restored_stations": len(self.last_reported),
+                  "data_dir": str(self.status_dir.parent), "kafka": self.kafka_cfg})
+        self.kafka_start()
         start = time.monotonic()
         deadline = start + max_minutes * 60 if max_minutes else None
         next_flush = start + FLUSH_S
@@ -223,7 +277,11 @@ class Collector:
                 self.stop.wait(max(0.0, wake - time.monotonic()))
         finally:
             self.flush()
-            self.log({"event": "stop", "elapsed_s": round(time.monotonic() - start, 1), **self.totals})
+            if self.producer is not None:
+                left = self.producer.flush(10)
+                self.kafka_stats["undelivered_at_stop"] = left
+            self.log({"event": "stop", "elapsed_s": round(time.monotonic() - start, 1), **self.totals,
+                      **({"kafka": self.kafka_stats} if self.kafka_cfg else {})})
             print(json.dumps({"event": "stop", **self.totals}), flush=True)
 
 
@@ -231,8 +289,14 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--once", action="store_true", help="one poll, flush, exit")
     ap.add_argument("--max-minutes", type=float, help="stop after this many minutes")
+    ap.add_argument("--data-dir", type=Path, default=LIVE_DIR,
+                    help="where status/, station_info/ and state go (default data/live)")
+    ap.add_argument("--kafka", action="store_true", help="also publish new rows to Kafka")
+    ap.add_argument("--kafka-bootstrap", default="localhost:9092")
+    ap.add_argument("--kafka-topic", default="station_status")
     a = ap.parse_args()
-    Collector().run(once=a.once, max_minutes=a.max_minutes)
+    kafka = {"bootstrap": a.kafka_bootstrap, "topic": a.kafka_topic} if a.kafka else None
+    Collector(data_dir=a.data_dir.resolve(), kafka=kafka).run(once=a.once, max_minutes=a.max_minutes)
 
 
 if __name__ == "__main__":

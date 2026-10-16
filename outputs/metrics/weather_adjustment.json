@@ -1,0 +1,198 @@
+{
+  "method": "factor = smoothed (actual / expected) system-wide 15-min departures/arrivals; shrunk toward product of marginal ratios with weight n/(n+24), clipped (0.2, 1.6)",
+  "precip_bins_mm_per_hour": {
+    "none": "0",
+    "light": "(0, 1)",
+    "moderate": "[1, 4)",
+    "heavy": ">= 4"
+  },
+  "temp_bands_c": {
+    "below 0": "< 0",
+    "0-10": "[0, 10)",
+    "10-20": "[10, 20)",
+    "20-28": "[20, 28)",
+    "28+": ">= 28"
+  },
+  "excluded": "US federal holidays and the 2026-02-22 20:00 - 02-24 06:00 shutdown window",
+  "overall_ratio": {
+    "dep": 0.9631,
+    "arr": 0.963
+  },
+  "marginal_precip": {
+    "heavy": 0.457,
+    "light": 0.8777,
+    "moderate": 0.5256,
+    "none": 0.9996
+  },
+  "marginal_temp": {
+    "0-10": 0.6773,
+    "10-20": 1.0659,
+    "20-28": 1.2953,
+    "28+": 1.3524,
+    "below 0": 0.371
+  },
+  "table": [
+    {
+      "precip_bin": "none",
+      "temp_band": "below 0",
+      "n_hours": 1227,
+      "ratio_dep_raw": 0.386,
+      "factor_dep": 0.386,
+      "ratio_arr_raw": 0.3832,
+      "factor_arr": 0.3832
+    },
+    {
+      "precip_bin": "none",
+      "temp_band": "0-10",
+      "n_hours": 1891,
+      "ratio_dep_raw": 0.7281,
+      "factor_dep": 0.7278,
+      "ratio_arr_raw": 0.7264,
+      "factor_arr": 0.7261
+    },
+    {
+      "precip_bin": "none",
+      "temp_band": "10-20",
+      "n_hours": 1835,
+      "ratio_dep_raw": 1.1498,
+      "factor_dep": 1.1493,
+      "ratio_arr_raw": 1.1518,
+      "factor_arr": 1.1512
+    },
+    {
+      "precip_bin": "none",
+      "temp_band": "20-28",
+      "n_hours": 1775,
+      "ratio_dep_raw": 1.3734,
+      "factor_dep": 1.373,
+      "ratio_arr_raw": 1.3742,
+      "factor_arr": 1.3738
+    },
+    {
+      "precip_bin": "none",
+      "temp_band": "28+",
+      "n_hours": 412,
+      "ratio_dep_raw": 1.3684,
+      "factor_dep": 1.3704,
+      "ratio_arr_raw": 1.3649,
+      "factor_arr": 1.3669
+    },
+    {
+      "precip_bin": "light",
+      "temp_band": "below 0",
+      "n_hours": 66,
+      "ratio_dep_raw": 0.2141,
+      "factor_dep": 0.2472,
+      "ratio_arr_raw": 0.2186,
+      "factor_arr": 0.2497
+    },
+    {
+      "precip_bin": "light",
+      "temp_band": "0-10",
+      "n_hours": 215,
+      "ratio_dep_raw": 0.4099,
+      "factor_dep": 0.4307,
+      "ratio_arr_raw": 0.4116,
+      "factor_arr": 0.432
+    },
+    {
+      "precip_bin": "light",
+      "temp_band": "10-20",
+      "n_hours": 233,
+      "ratio_dep_raw": 0.7398,
+      "factor_dep": 0.7614,
+      "ratio_arr_raw": 0.7411,
+      "factor_arr": 0.7625
+    },
+    {
+      "precip_bin": "light",
+      "temp_band": "20-28",
+      "n_hours": 299,
+      "ratio_dep_raw": 1.1299,
+      "factor_dep": 1.1337,
+      "ratio_arr_raw": 1.1221,
+      "factor_arr": 1.1263
+    },
+    {
+      "precip_bin": "light",
+      "temp_band": "28+",
+      "n_hours": 100,
+      "ratio_dep_raw": 1.2967,
+      "factor_dep": 1.2843,
+      "ratio_arr_raw": 1.2979,
+      "factor_arr": 1.2843
+    },
+    {
+      "precip_bin": "moderate",
+      "temp_band": "below 0",
+      "n_hours": 27,
+      "ratio_dep_raw": 0.0397,
+      "factor_dep": 0.2,
+      "ratio_arr_raw": 0.0402,
+      "factor_arr": 0.2
+    },
+    {
+      "precip_bin": "moderate",
+      "temp_band": "0-10",
+      "n_hours": 68,
+      "ratio_dep_raw": 0.2654,
+      "factor_dep": 0.2926,
+      "ratio_arr_raw": 0.2622,
+      "factor_arr": 0.291
+    },
+    {
+      "precip_bin": "moderate",
+      "temp_band": "10-20",
+      "n_hours": 117,
+      "ratio_dep_raw": 0.3935,
+      "factor_dep": 0.4255,
+      "ratio_arr_raw": 0.3883,
+      "factor_arr": 0.4224
+    },
+    {
+      "precip_bin": "moderate",
+      "temp_band": "20-28",
+      "n_hours": 119,
+      "ratio_dep_raw": 0.8336,
+      "factor_dep": 0.8124,
+      "ratio_arr_raw": 0.8557,
+      "factor_arr": 0.8321
+    },
+    {
+      "precip_bin": "moderate",
+      "temp_band": "28+",
+      "n_hours": 4,
+      "ratio_dep_raw": 1.282,
+      "factor_dep": 0.8158,
+      "ratio_arr_raw": 1.2619,
+      "factor_arr": 0.8183
+    },
+    {
+      "precip_bin": "heavy",
+      "temp_band": "0-10",
+      "n_hours": 3,
+      "ratio_dep_raw": 0.1504,
+      "factor_dep": 0.3023,
+      "ratio_arr_raw": 0.1413,
+      "factor_arr": 0.3022
+    },
+    {
+      "precip_bin": "heavy",
+      "temp_band": "10-20",
+      "n_hours": 18,
+      "ratio_dep_raw": 0.2844,
+      "factor_dep": 0.4109,
+      "ratio_arr_raw": 0.2738,
+      "factor_arr": 0.4081
+    },
+    {
+      "precip_bin": "heavy",
+      "temp_band": "20-28",
+      "n_hours": 29,
+      "ratio_dep_raw": 0.6052,
+      "factor_dep": 0.6095,
+      "ratio_arr_raw": 0.6203,
+      "factor_arr": 0.6192
+    }
+  ]
+}

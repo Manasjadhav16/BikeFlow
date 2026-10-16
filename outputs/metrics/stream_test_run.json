@@ -1,0 +1,46 @@
+{
+  "test": "scripts/test_stream_replay.sh data/replay_src/status 20 (copy of 18:02-19:00 UTC 2026-10-16; temporary topics)",
+  "recording": {
+    "start_utc": "2026-10-16T18:02:19Z",
+    "end_utc": "2026-10-16T18:59:39Z",
+    "rows": 75149,
+    "sources": "data/test_live (test collector, 18:02-18:33) + copy of data/live/status hour>=18"
+  },
+  "replay": {
+    "messages": 75092,
+    "skipped_stale": 57,
+    "speed": 20,
+    "wall_s": 217.0
+  },
+  "engine": {
+    "batches": 43,
+    "wall_s": 280.7,
+    "micro_batch_s": {
+      "mean": 3.39,
+      "max": 4.9
+    },
+    "alert_step_s": {
+      "mean": 3.13,
+      "max": 4.79
+    },
+    "peak_rss_gb_spark_and_python_workers": 1.21,
+    "peak_swap_gb": 1.04,
+    "trigger_s": 5,
+    "kafka_alert_messages": 18519
+  },
+  "alerts_by_kind_and_level": {
+    "HIGH": {
+      "already_empty": 6685,
+      "already_full": 11304,
+      "risk_empty": 7,
+      "risk_full": 1
+    },
+    "MEDIUM": {
+      "already_empty": 0,
+      "already_full": 0,
+      "risk_empty": 252,
+      "risk_full": 270
+    }
+  },
+  "scores_file": "outputs/metrics/alert_scores.json"
+}

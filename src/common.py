@@ -66,25 +66,32 @@ def _ensure_java_home() -> None:
         pass  # let PySpark report the missing JVM
 
 
-def get_spark(app_name: str):
-    """SparkSession sized for an 8 GB laptop: 3 cores, 3 GB driver, small partitions, AQE."""
+def get_spark(app_name: str, driver_memory: str = "3g", cores: int = 3, shuffle_partitions: int = 32,
+              packages: str | None = None):
+    """SparkSession sized for an 8 GB laptop (defaults: 3 cores, 3 GB driver, small partitions, AQE).
+    Stage 3b (alongside Kafka and the collector) uses 2g / local[2] / 16 partitions."""
     _ensure_java_home()
+    # Python UDF workers (applyInPandas*) must use this venv's interpreter, not the system python.
+    os.environ.setdefault("PYSPARK_PYTHON", sys.executable)
+    os.environ.setdefault("PYSPARK_DRIVER_PYTHON", sys.executable)
     from pyspark.sql import SparkSession
 
     SPARK_TMP.mkdir(parents=True, exist_ok=True)
-    spark = (
+    builder = (
         SparkSession.builder.appName(app_name)
-        .master("local[3]")
-        .config("spark.driver.memory", "3g")
+        .master(f"local[{cores}]")
+        .config("spark.driver.memory", driver_memory)
         .config("spark.sql.session.timeZone", TIMEZONE)
-        .config("spark.sql.shuffle.partitions", "32")
+        .config("spark.sql.shuffle.partitions", str(shuffle_partitions))
         .config("spark.sql.files.maxPartitionBytes", "64m")
         .config("spark.sql.adaptive.enabled", "true")
         .config("spark.local.dir", str(SPARK_TMP))
         .config("spark.sql.parquet.compression.codec", "zstd")
         .config("spark.ui.showConsoleProgress", "false")
-        .getOrCreate()
     )
+    if packages:
+        builder = builder.config("spark.jars.packages", packages)
+    spark = builder.getOrCreate()
     spark.sparkContext.setLogLevel("ERROR")
     return spark
 
@@ -104,9 +111,10 @@ def swap_used_gb() -> float:
 class ResourceMonitor:
     """Samples RSS of this Python process + the Spark JVM, and swap, once a second; keeps peaks."""
 
-    def __init__(self, spark, interval: float = 1.0):
+    def __init__(self, spark, interval: float = 1.0, include_children: bool = False):
         self.pids = [str(os.getpid()), str(spark._jvm.java.lang.ProcessHandle.current().pid())]
         self.interval = interval
+        self.include_children = include_children  # also count Python UDF workers (descendants of the JVM)
         self.peak_rss_gb = 0.0
         self.peak_swap_gb = swap_used_gb()
         self._stop = threading.Event()
@@ -114,7 +122,21 @@ class ResourceMonitor:
 
     def _run(self) -> None:
         while not self._stop.is_set():
-            out = subprocess.run(["ps", "-o", "rss=", "-p", ",".join(self.pids)],
+            pids = set(self.pids)
+            if self.include_children:
+                table = subprocess.run(["ps", "-axo", "pid=,ppid="], capture_output=True, text=True).stdout
+                kids = {}
+                for line in table.split("\n"):
+                    if line.strip():
+                        pid, ppid = line.split()
+                        kids.setdefault(ppid, []).append(pid)
+                frontier = list(self.pids)
+                while frontier:
+                    for c in kids.get(frontier.pop(), []):
+                        if c not in pids:
+                            pids.add(c)
+                            frontier.append(c)
+            out = subprocess.run(["ps", "-o", "rss=", "-p", ",".join(sorted(pids))],
                                  capture_output=True, text=True).stdout
             rss = sum(int(x) for x in out.split()) / 1024 / 1024
             self.peak_rss_gb = max(self.peak_rss_gb, rss)

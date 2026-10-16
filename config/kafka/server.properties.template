@@ -1,0 +1,25 @@
+# Single-node Kafka in KRaft mode (no ZooKeeper) for BikeFlow. Generated into data/kafka/ by
+# scripts/start_kafka.sh, which fills in @KAFKA_DATA@.
+process.roles=broker,controller
+node.id=1
+controller.quorum.voters=1@localhost:9093
+listeners=PLAINTEXT://localhost:9092,CONTROLLER://localhost:9093
+advertised.listeners=PLAINTEXT://localhost:9092
+controller.listener.names=CONTROLLER
+inter.broker.listener.name=PLAINTEXT
+listener.security.protocol.map=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+
+log.dirs=@KAFKA_DATA@/logs
+num.partitions=1
+auto.create.topics.enable=false
+offsets.topic.replication.factor=1
+transaction.state.log.replication.factor=1
+transaction.state.log.min.isr=1
+share.coordinator.state.topic.replication.factor=1
+share.coordinator.state.topic.min.isr=1
+group.initial.rebalance.delay.ms=0
+
+# Keep 24 hours; 64 MB segments so old data is actually deleted on time.
+log.retention.hours=24
+log.segment.bytes=67108864
+log.retention.check.interval.ms=300000
