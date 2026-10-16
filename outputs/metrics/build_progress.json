@@ -1,0 +1,444 @@
+{
+  "records": [
+    {
+      "step": "demand",
+      "month": "2026-06",
+      "rows": 2907725,
+      "seconds": 13.5,
+      "free_disk_gb": 23.6,
+      "swap_used_gb": 0.16,
+      "peak_rss_gb": 1.14,
+      "peak_swap_gb": 0.16
+    },
+    {
+      "step": "stations",
+      "month": "2025-10",
+      "rows": 4728018,
+      "seconds": 13.7,
+      "free_disk_gb": 23.45,
+      "swap_used_gb": 0.17,
+      "peak_rss_gb": 1.41,
+      "peak_swap_gb": 0.17
+    },
+    {
+      "step": "stations",
+      "month": "2025-11",
+      "rows": 3414449,
+      "seconds": 6.2,
+      "free_disk_gb": 23.45,
+      "swap_used_gb": 0.21,
+      "peak_rss_gb": 1.47,
+      "peak_swap_gb": 0.21
+    },
+    {
+      "step": "stations",
+      "month": "2025-12",
+      "rows": 2089981,
+      "seconds": 4.0,
+      "free_disk_gb": 23.45,
+      "swap_used_gb": 0.21,
+      "peak_rss_gb": 1.5,
+      "peak_swap_gb": 0.21
+    },
+    {
+      "step": "stations",
+      "month": "2026-01",
+      "rows": 1814399,
+      "seconds": 3.3,
+      "free_disk_gb": 23.44,
+      "swap_used_gb": 0.21,
+      "peak_rss_gb": 1.36,
+      "peak_swap_gb": 0.21
+    },
+    {
+      "step": "stations",
+      "month": "2026-03",
+      "rows": 2943422,
+      "seconds": 4.9,
+      "free_disk_gb": 23.43,
+      "swap_used_gb": 0.26,
+      "peak_rss_gb": 1.49,
+      "peak_swap_gb": 0.26
+    },
+    {
+      "step": "stations",
+      "month": "2026-04",
+      "rows": 3857666,
+      "seconds": 7.0,
+      "free_disk_gb": 23.43,
+      "swap_used_gb": 0.38,
+      "peak_rss_gb": 1.41,
+      "peak_swap_gb": 0.38
+    },
+    {
+      "step": "stations",
+      "month": "2026-05",
+      "rows": 4691530,
+      "seconds": 8.1,
+      "free_disk_gb": 23.42,
+      "swap_used_gb": 0.4,
+      "peak_rss_gb": 1.48,
+      "peak_swap_gb": 0.4
+    },
+    {
+      "step": "stations",
+      "month": "2026-06",
+      "rows": 5380085,
+      "seconds": 8.9,
+      "free_disk_gb": 23.41,
+      "swap_used_gb": 0.48,
+      "peak_rss_gb": 1.54,
+      "peak_swap_gb": 0.48
+    },
+    {
+      "step": "stations",
+      "month": "2026-07",
+      "rows": 4988980,
+      "seconds": 7.4,
+      "free_disk_gb": 23.41,
+      "swap_used_gb": 0.48,
+      "peak_rss_gb": 1.83,
+      "peak_swap_gb": 0.48
+    },
+    {
+      "step": "stations",
+      "month": "2026-08",
+      "rows": 5242103,
+      "seconds": 8.7,
+      "free_disk_gb": 23.4,
+      "swap_used_gb": 0.47,
+      "peak_rss_gb": 1.66,
+      "peak_swap_gb": 0.48
+    },
+    {
+      "step": "stations",
+      "month": "2026-09",
+      "rows": 4978868,
+      "seconds": 6.6,
+      "free_disk_gb": 23.39,
+      "swap_used_gb": 0.47,
+      "peak_rss_gb": 1.86,
+      "peak_swap_gb": 0.47
+    },
+    {
+      "step": "demand",
+      "month": "2025-10",
+      "rows": 2696982,
+      "seconds": 11.4,
+      "free_disk_gb": 23.33,
+      "swap_used_gb": 0.46,
+      "peak_rss_gb": 1.71,
+      "peak_swap_gb": 0.46
+    },
+    {
+      "step": "demand",
+      "month": "2025-11",
+      "rows": 2294746,
+      "seconds": 5.9,
+      "free_disk_gb": 23.25,
+      "swap_used_gb": 0.46,
+      "peak_rss_gb": 1.8,
+      "peak_swap_gb": 0.46
+    },
+    {
+      "step": "demand",
+      "month": "2025-12",
+      "rows": 1799206,
+      "seconds": 4.3,
+      "free_disk_gb": 23.24,
+      "swap_used_gb": 0.46,
+      "peak_rss_gb": 1.57,
+      "peak_swap_gb": 0.46
+    },
+    {
+      "step": "demand",
+      "month": "2026-01",
+      "rows": 1594722,
+      "seconds": 3.8,
+      "free_disk_gb": 23.2,
+      "swap_used_gb": 0.46,
+      "peak_rss_gb": 1.6,
+      "peak_swap_gb": 0.46
+    },
+    {
+      "step": "demand",
+      "month": "2026-03",
+      "rows": 2160263,
+      "seconds": 4.8,
+      "free_disk_gb": 23.19,
+      "swap_used_gb": 0.46,
+      "peak_rss_gb": 1.58,
+      "peak_swap_gb": 0.46
+    },
+    {
+      "step": "demand",
+      "month": "2026-04",
+      "rows": 2415448,
+      "seconds": 5.7,
+      "free_disk_gb": 23.18,
+      "swap_used_gb": 0.46,
+      "peak_rss_gb": 1.67,
+      "peak_swap_gb": 0.46
+    },
+    {
+      "step": "demand",
+      "month": "2026-05",
+      "rows": 2731843,
+      "seconds": 6.7,
+      "free_disk_gb": 23.16,
+      "swap_used_gb": 0.46,
+      "peak_rss_gb": 1.53,
+      "peak_swap_gb": 0.46
+    },
+    {
+      "step": "demand",
+      "month": "2026-07",
+      "rows": 2919648,
+      "seconds": 7.3,
+      "free_disk_gb": 23.15,
+      "swap_used_gb": 0.46,
+      "peak_rss_gb": 1.63,
+      "peak_swap_gb": 0.46
+    },
+    {
+      "step": "demand",
+      "month": "2026-08",
+      "rows": 2982059,
+      "seconds": 7.4,
+      "free_disk_gb": 23.03,
+      "swap_used_gb": 0.46,
+      "peak_rss_gb": 1.64,
+      "peak_swap_gb": 0.46
+    },
+    {
+      "step": "demand",
+      "month": "2026-09",
+      "rows": 2776972,
+      "seconds": 6.7,
+      "free_disk_gb": 23.01,
+      "swap_used_gb": 0.46,
+      "peak_rss_gb": 1.67,
+      "peak_swap_gb": 0.46
+    },
+    {
+      "step": "stations",
+      "month": "2025-10",
+      "rows": 4728018,
+      "seconds": 11.4,
+      "free_disk_gb": 22.44,
+      "swap_used_gb": 0.45,
+      "peak_rss_gb": 1.62,
+      "peak_swap_gb": 0.45
+    },
+    {
+      "step": "stations",
+      "month": "2025-11",
+      "rows": 3414449,
+      "seconds": 4.3,
+      "free_disk_gb": 22.45,
+      "swap_used_gb": 0.45,
+      "peak_rss_gb": 1.64,
+      "peak_swap_gb": 0.45
+    },
+    {
+      "step": "stations",
+      "month": "2025-12",
+      "rows": 2089981,
+      "seconds": 3.0,
+      "free_disk_gb": 22.43,
+      "swap_used_gb": 0.45,
+      "peak_rss_gb": 1.57,
+      "peak_swap_gb": 0.45
+    },
+    {
+      "step": "stations",
+      "month": "2026-01",
+      "rows": 1814399,
+      "seconds": 3.0,
+      "free_disk_gb": 22.43,
+      "swap_used_gb": 0.45,
+      "peak_rss_gb": 1.53,
+      "peak_swap_gb": 0.45
+    },
+    {
+      "step": "stations",
+      "month": "2026-03",
+      "rows": 2943422,
+      "seconds": 3.9,
+      "free_disk_gb": 22.58,
+      "swap_used_gb": 0.45,
+      "peak_rss_gb": 1.6,
+      "peak_swap_gb": 0.45
+    },
+    {
+      "step": "stations",
+      "month": "2026-04",
+      "rows": 3857666,
+      "seconds": 5.0,
+      "free_disk_gb": 23.18,
+      "swap_used_gb": 0.45,
+      "peak_rss_gb": 1.61,
+      "peak_swap_gb": 0.45
+    },
+    {
+      "step": "stations",
+      "month": "2026-05",
+      "rows": 4691530,
+      "seconds": 5.9,
+      "free_disk_gb": 23.17,
+      "swap_used_gb": 0.45,
+      "peak_rss_gb": 1.72,
+      "peak_swap_gb": 0.45
+    },
+    {
+      "step": "stations",
+      "month": "2026-06",
+      "rows": 5380085,
+      "seconds": 6.8,
+      "free_disk_gb": 23.16,
+      "swap_used_gb": 0.45,
+      "peak_rss_gb": 1.64,
+      "peak_swap_gb": 0.45
+    },
+    {
+      "step": "stations",
+      "month": "2026-07",
+      "rows": 4988980,
+      "seconds": 6.4,
+      "free_disk_gb": 23.02,
+      "swap_used_gb": 0.45,
+      "peak_rss_gb": 1.66,
+      "peak_swap_gb": 0.45
+    },
+    {
+      "step": "stations",
+      "month": "2026-08",
+      "rows": 5242103,
+      "seconds": 6.8,
+      "free_disk_gb": 23.02,
+      "swap_used_gb": 0.45,
+      "peak_rss_gb": 1.65,
+      "peak_swap_gb": 0.45
+    },
+    {
+      "step": "stations",
+      "month": "2026-09",
+      "rows": 4978868,
+      "seconds": 6.6,
+      "free_disk_gb": 23.01,
+      "swap_used_gb": 0.45,
+      "peak_rss_gb": 1.63,
+      "peak_swap_gb": 0.45
+    },
+    {
+      "step": "demand",
+      "month": "2025-10",
+      "rows": 2696982,
+      "seconds": 16.4,
+      "free_disk_gb": 22.95,
+      "swap_used_gb": 0.44,
+      "peak_rss_gb": 1.66,
+      "peak_swap_gb": 0.45
+    },
+    {
+      "step": "demand",
+      "month": "2025-11",
+      "rows": 2294746,
+      "seconds": 11.3,
+      "free_disk_gb": 22.96,
+      "swap_used_gb": 0.44,
+      "peak_rss_gb": 1.5,
+      "peak_swap_gb": 0.44
+    },
+    {
+      "step": "demand",
+      "month": "2025-12",
+      "rows": 1799206,
+      "seconds": 8.0,
+      "free_disk_gb": 22.91,
+      "swap_used_gb": 0.44,
+      "peak_rss_gb": 1.49,
+      "peak_swap_gb": 0.44
+    },
+    {
+      "step": "demand",
+      "month": "2026-01",
+      "rows": 1594722,
+      "seconds": 5.4,
+      "free_disk_gb": 22.9,
+      "swap_used_gb": 0.44,
+      "peak_rss_gb": 1.66,
+      "peak_swap_gb": 0.44
+    },
+    {
+      "step": "demand",
+      "month": "2026-03",
+      "rows": 2160263,
+      "seconds": 8.0,
+      "free_disk_gb": 22.84,
+      "swap_used_gb": 0.44,
+      "peak_rss_gb": 1.52,
+      "peak_swap_gb": 0.44
+    },
+    {
+      "step": "demand",
+      "month": "2026-04",
+      "rows": 2415448,
+      "seconds": 11.1,
+      "free_disk_gb": 22.75,
+      "swap_used_gb": 0.43,
+      "peak_rss_gb": 1.59,
+      "peak_swap_gb": 0.44
+    },
+    {
+      "step": "demand",
+      "month": "2026-05",
+      "rows": 2731843,
+      "seconds": 12.5,
+      "free_disk_gb": 22.64,
+      "swap_used_gb": 0.43,
+      "peak_rss_gb": 1.38,
+      "peak_swap_gb": 0.43
+    },
+    {
+      "step": "demand",
+      "month": "2026-06",
+      "rows": 2907725,
+      "seconds": 13.7,
+      "free_disk_gb": 22.52,
+      "swap_used_gb": 0.43,
+      "peak_rss_gb": 1.44,
+      "peak_swap_gb": 0.43
+    },
+    {
+      "step": "demand",
+      "month": "2026-07",
+      "rows": 2919648,
+      "seconds": 13.6,
+      "free_disk_gb": 22.41,
+      "swap_used_gb": 0.43,
+      "peak_rss_gb": 1.49,
+      "peak_swap_gb": 0.43
+    },
+    {
+      "step": "demand",
+      "month": "2026-08",
+      "rows": 2982059,
+      "seconds": 13.5,
+      "free_disk_gb": 22.29,
+      "swap_used_gb": 0.43,
+      "peak_rss_gb": 1.42,
+      "peak_swap_gb": 0.43
+    },
+    {
+      "step": "demand",
+      "month": "2026-09",
+      "rows": 2776972,
+      "seconds": 11.5,
+      "free_disk_gb": 22.18,
+      "swap_used_gb": 0.43,
+      "peak_rss_gb": 1.47,
+      "peak_swap_gb": 0.43
+    }
+  ]
+}

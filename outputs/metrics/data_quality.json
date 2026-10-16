@@ -1,97 +1,474 @@
 {
-  "input_rows": 15222228,
-  "output_rows": 15209951,
+  "months_included": [
+    "2025-10",
+    "2025-11",
+    "2025-12",
+    "2026-01",
+    "2026-03",
+    "2026-04",
+    "2026-05",
+    "2026-06",
+    "2026-07",
+    "2026-08",
+    "2026-09"
+  ],
+  "quarantined_months": {
+    "2026-02": {
+      "reason": "1 of 28 days have < 100 rides (first 2026-02-23, last 2026-02-23)",
+      "action": "raw Parquet kept, excluded from trips_clean; include with: python -m src.clean --include 2026-02",
+      "inspection": {
+        "rows": 1219444,
+        "min_started_at": "2026-01-30 23:24:24.773",
+        "max_started_at": "2026-02-28 23:57:16.242",
+        "calendar_days": 28,
+        "days_covered": 27,
+        "days_not_covered": [
+          "2026-02-23"
+        ],
+        "rides_per_day_min_max": [
+          13135,
+          76447
+        ],
+        "started_outside_month": 171,
+        "issues": [
+          "1 of 28 days have < 100 rides (first 2026-02-23, last 2026-02-23)"
+        ]
+      }
+    }
+  },
+  "input_rows": 44164661,
+  "output_rows": 44129501,
   "rules": [
     {
       "rule": "null_or_invalid_timestamp",
-      "before": 15222228,
+      "before": 44164661,
       "removed": 0,
-      "after": 15222228
+      "after": 44164661
     },
     {
       "rule": "ended_at_not_after_started_at",
-      "before": 15222228,
-      "removed": 0,
-      "after": 15222228
+      "before": 44164661,
+      "removed": 482,
+      "after": 44164179
     },
     {
       "rule": "duration_over_24h",
-      "before": 15222228,
-      "removed": 3462,
-      "after": 15218766
+      "before": 44164179,
+      "removed": 9677,
+      "after": 44154502
     },
     {
       "rule": "null_start_station_id",
-      "before": 15218766,
-      "removed": 8815,
-      "after": 15209951
+      "before": 44154502,
+      "removed": 25001,
+      "after": 44129501
     },
     {
       "rule": "dedupe_ride_id",
-      "before": 15209951,
+      "before": 44129501,
       "removed": 0,
-      "after": 15209951
+      "after": 44129501
     }
   ],
   "station_id_normalized": {
-    "start_station_id_one_decimal_padded": 30892,
-    "end_station_id_one_decimal_padded": 238368
+    "start_station_id_one_decimal_padded": 93237,
+    "end_station_id_one_decimal_padded": 643381
   },
   "flags": {
-    "end_station_missing": 39859,
-    "end_station_missing_pct": 0.262
+    "end_station_missing": 112697,
+    "end_station_missing_pct": 0.255
   },
   "observations": {
+    "cross_month_duplicate_ride_ids_adjacent": {
+      "2025-10/2025-11": 0,
+      "2025-11/2025-12": 0,
+      "2025-12/2026-01": 0,
+      "2026-01/2026-03": 0,
+      "2026-03/2026-04": 0,
+      "2026-04/2026-05": 495,
+      "2026-05/2026-06": 0,
+      "2026-06/2026-07": 0,
+      "2026-07/2026-08": 0,
+      "2026-08/2026-09": 0
+    },
+    "cross_month_duplicate_ride_ids_adjacent_with_end_station": {
+      "2025-10/2025-11": 0,
+      "2025-11/2025-12": 0,
+      "2025-12/2026-01": 0,
+      "2026-01/2026-03": 0,
+      "2026-03/2026-04": 0,
+      "2026-04/2026-05": 481,
+      "2026-05/2026-06": 0,
+      "2026-06/2026-07": 0,
+      "2026-07/2026-08": 0,
+      "2026-08/2026-09": 0
+    },
     "null_ride_id_in_output": 0,
-    "started_outside_source_month": 2776,
-    "duration_sec_p50_p95_p99": [
-      576,
-      2083,
-      3714
-    ],
-    "duration_under_60s": 0,
+    "started_outside_source_month": 6341,
+    "duration_sec_p50_p95_p99_by_month": {
+      "2025-10": [
+        536,
+        1890,
+        3266
+      ],
+      "2025-11": [
+        498,
+        1766,
+        3029
+      ],
+      "2025-12": [
+        452,
+        1569,
+        2668
+      ],
+      "2026-01": [
+        450,
+        1555,
+        2657
+      ],
+      "2026-03": [
+        505,
+        1862,
+        3249
+      ],
+      "2026-04": [
+        539,
+        1974,
+        3491
+      ],
+      "2026-05": [
+        568,
+        2045,
+        3601
+      ],
+      "2026-06": [
+        587,
+        2094,
+        3732
+      ],
+      "2026-07": [
+        570,
+        2067,
+        3732
+      ],
+      "2026-08": [
+        587,
+        2166,
+        3906
+      ],
+      "2026-09": [
+        570,
+        2011,
+        3492
+      ]
+    },
+    "duration_under_60s": 4,
     "rideable_type": {
-      "classic_bike": 4095821,
-      "electric_bike": 11114130
+      "classic_bike": 12222392,
+      "electric_bike": 31907109
     },
     "member_casual": {
-      "casual": 3081895,
-      "member": 12128056
+      "casual": 7751926,
+      "member": 36377575
     }
   },
-  "per_source_month": [
-    {
-      "year": 2026,
-      "month": 7,
+  "per_month": {
+    "2025-10": {
+      "input": 4731900,
+      "null_or_invalid_timestamp": 0,
+      "ended_at_not_after_started_at": 0,
+      "duration_over_24h": 739,
+      "null_start_station_id": 3143,
+      "dedupe_ride_id": 0,
+      "output": 4728018,
+      "end_station_missing": 11840,
+      "normalized_start_station_id": 9675,
+      "normalized_end_station_id": 40573,
+      "verified": true,
+      "inspection": {
+        "rows": 4731900,
+        "min_started_at": "2025-09-30 02:10:54.819",
+        "max_started_at": "2025-10-31 23:58:16.325",
+        "calendar_days": 31,
+        "days_covered": 31,
+        "days_not_covered": [],
+        "rides_per_day_min_max": [
+          61111,
+          188107
+        ],
+        "started_outside_month": 639,
+        "issues": []
+      }
+    },
+    "2025-11": {
+      "input": 3417052,
+      "null_or_invalid_timestamp": 0,
+      "ended_at_not_after_started_at": 482,
+      "duration_over_24h": 777,
+      "null_start_station_id": 1344,
+      "dedupe_ride_id": 0,
+      "output": 3414449,
+      "end_station_missing": 7625,
+      "normalized_start_station_id": 7548,
+      "normalized_end_station_id": 40875,
+      "verified": true,
+      "inspection": {
+        "rows": 3417052,
+        "min_started_at": "2025-10-31 01:00:18.978",
+        "max_started_at": "2025-11-30 23:57:47.774",
+        "calendar_days": 30,
+        "days_covered": 30,
+        "days_not_covered": [],
+        "rides_per_day_min_max": [
+          45282,
+          159075
+        ],
+        "started_outside_month": 1097,
+        "issues": []
+      }
+    },
+    "2025-12": {
+      "input": 2091620,
+      "null_or_invalid_timestamp": 0,
+      "ended_at_not_after_started_at": 0,
+      "duration_over_24h": 449,
+      "null_start_station_id": 1190,
+      "dedupe_ride_id": 0,
+      "output": 2089981,
+      "end_station_missing": 4853,
+      "normalized_start_station_id": 4944,
+      "normalized_end_station_id": 31557,
+      "verified": true,
+      "inspection": {
+        "rows": 2091620,
+        "min_started_at": "2025-11-30 15:46:22.694",
+        "max_started_at": "2025-12-31 23:57:28.999",
+        "calendar_days": 31,
+        "days_covered": 31,
+        "days_not_covered": [],
+        "rides_per_day_min_max": [
+          12871,
+          105353
+        ],
+        "started_outside_month": 137,
+        "issues": []
+      }
+    },
+    "2026-01": {
+      "input": 1816391,
+      "null_or_invalid_timestamp": 0,
+      "ended_at_not_after_started_at": 0,
+      "duration_over_24h": 658,
+      "null_start_station_id": 1334,
+      "dedupe_ride_id": 0,
+      "output": 1814399,
+      "end_station_missing": 7870,
+      "normalized_start_station_id": 4754,
+      "normalized_end_station_id": 13600,
+      "verified": true,
+      "inspection": {
+        "rows": 1816391,
+        "min_started_at": "2025-12-30 23:30:09.507",
+        "max_started_at": "2026-01-31 23:56:50.315",
+        "calendar_days": 31,
+        "days_covered": 31,
+        "days_not_covered": [],
+        "rides_per_day_min_max": [
+          3053,
+          106612
+        ],
+        "started_outside_month": 266,
+        "issues": []
+      }
+    },
+    "2026-03": {
+      "input": 2945753,
+      "null_or_invalid_timestamp": 0,
+      "ended_at_not_after_started_at": 0,
+      "duration_over_24h": 691,
+      "null_start_station_id": 1640,
+      "dedupe_ride_id": 0,
+      "output": 2943422,
+      "end_station_missing": 8297,
+      "normalized_start_station_id": 6591,
+      "normalized_end_station_id": 39800,
+      "verified": true,
+      "inspection": {
+        "rows": 2945753,
+        "min_started_at": "2026-02-28 02:20:53.769",
+        "max_started_at": "2026-03-31 23:58:13.842",
+        "calendar_days": 31,
+        "days_covered": 31,
+        "days_not_covered": [],
+        "rides_per_day_min_max": [
+          38569,
+          154622
+        ],
+        "started_outside_month": 433,
+        "issues": []
+      }
+    },
+    "2026-04": {
+      "input": 3860371,
+      "null_or_invalid_timestamp": 0,
+      "ended_at_not_after_started_at": 0,
+      "duration_over_24h": 766,
+      "null_start_station_id": 1939,
+      "dedupe_ride_id": 0,
+      "output": 3857666,
+      "end_station_missing": 9527,
+      "normalized_start_station_id": 8403,
+      "normalized_end_station_id": 71379,
+      "verified": true,
+      "inspection": {
+        "rows": 3860371,
+        "min_started_at": "2026-04-01 00:00:02.969",
+        "max_started_at": "2026-04-30 23:59:58.765",
+        "calendar_days": 30,
+        "days_covered": 30,
+        "days_not_covered": [],
+        "rides_per_day_min_max": [
+          39087,
+          178893
+        ],
+        "started_outside_month": 0,
+        "issues": []
+      }
+    },
+    "2026-05": {
+      "input": 4694878,
+      "null_or_invalid_timestamp": 0,
+      "ended_at_not_after_started_at": 0,
+      "duration_over_24h": 906,
+      "null_start_station_id": 2442,
+      "dedupe_ride_id": 0,
+      "output": 4691530,
+      "end_station_missing": 10319,
+      "normalized_start_station_id": 9461,
+      "normalized_end_station_id": 68336,
+      "verified": true,
+      "inspection": {
+        "rows": 4694878,
+        "min_started_at": "2026-04-30 00:54:03.269",
+        "max_started_at": "2026-05-31 23:58:10.888",
+        "calendar_days": 31,
+        "days_covered": 31,
+        "days_not_covered": [],
+        "rides_per_day_min_max": [
+          42639,
+          191759
+        ],
+        "started_outside_month": 512,
+        "issues": []
+      }
+    },
+    "2026-06": {
+      "input": 5384468,
+      "null_or_invalid_timestamp": 0,
+      "ended_at_not_after_started_at": 0,
+      "duration_over_24h": 1229,
+      "null_start_station_id": 3154,
+      "dedupe_ride_id": 0,
+      "output": 5380085,
+      "end_station_missing": 12507,
+      "normalized_start_station_id": 10969,
+      "normalized_end_station_id": 98893,
+      "verified": true,
+      "inspection": {
+        "rows": 5384468,
+        "min_started_at": "2026-05-30 23:42:34.009",
+        "max_started_at": "2026-06-30 23:57:43.182",
+        "calendar_days": 30,
+        "days_covered": 30,
+        "days_not_covered": [],
+        "rides_per_day_min_max": [
+          105559,
+          204801
+        ],
+        "started_outside_month": 635,
+        "issues": []
+      }
+    },
+    "2026-07": {
       "input": 4993137,
-      "normalized_start_station_id": 9650,
-      "normalized_end_station_id": 70426,
       "null_or_invalid_timestamp": 0,
       "ended_at_not_after_started_at": 0,
       "duration_over_24h": 1129,
-      "null_start_station_id": 3028
+      "null_start_station_id": 3028,
+      "dedupe_ride_id": 0,
+      "output": 4988980,
+      "end_station_missing": 13601,
+      "normalized_start_station_id": 9650,
+      "normalized_end_station_id": 70426,
+      "verified": true,
+      "inspection": {
+        "rows": 4993137,
+        "min_started_at": "2026-06-30 00:23:00.162",
+        "max_started_at": "2026-07-31 23:57:24.437",
+        "calendar_days": 31,
+        "days_covered": 31,
+        "days_not_covered": [],
+        "rides_per_day_min_max": [
+          63951,
+          197316
+        ],
+        "started_outside_month": 869,
+        "issues": []
+      }
     },
-    {
-      "year": 2026,
-      "month": 8,
+    "2026-08": {
       "input": 5246236,
-      "normalized_start_station_id": 11040,
-      "normalized_end_station_id": 89846,
       "null_or_invalid_timestamp": 0,
       "ended_at_not_after_started_at": 0,
       "duration_over_24h": 1263,
-      "null_start_station_id": 2870
+      "null_start_station_id": 2870,
+      "dedupe_ride_id": 0,
+      "output": 5242103,
+      "end_station_missing": 13062,
+      "normalized_start_station_id": 11040,
+      "normalized_end_station_id": 89846,
+      "verified": true,
+      "inspection": {
+        "rows": 5246236,
+        "min_started_at": "2026-07-31 02:10:56.632",
+        "max_started_at": "2026-08-31 23:58:01.765",
+        "calendar_days": 31,
+        "days_covered": 31,
+        "days_not_covered": [],
+        "rides_per_day_min_max": [
+          114533,
+          209504
+        ],
+        "started_outside_month": 1454,
+        "issues": []
+      }
     },
-    {
-      "year": 2026,
-      "month": 9,
+    "2026-09": {
       "input": 4982855,
-      "normalized_start_station_id": 10202,
-      "normalized_end_station_id": 78096,
       "null_or_invalid_timestamp": 0,
       "ended_at_not_after_started_at": 0,
       "duration_over_24h": 1070,
-      "null_start_station_id": 2917
+      "null_start_station_id": 2917,
+      "dedupe_ride_id": 0,
+      "output": 4978868,
+      "end_station_missing": 13196,
+      "normalized_start_station_id": 10202,
+      "normalized_end_station_id": 78096,
+      "verified": true,
+      "inspection": {
+        "rows": 4982855,
+        "min_started_at": "2026-08-31 00:50:32.105",
+        "max_started_at": "2026-09-30 23:58:16.821",
+        "calendar_days": 30,
+        "days_covered": 30,
+        "days_not_covered": [],
+        "rides_per_day_min_max": [
+          33335,
+          212404
+        ],
+        "started_outside_month": 549,
+        "issues": []
+      }
     }
-  ]
+  }
 }

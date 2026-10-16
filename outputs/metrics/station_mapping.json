@@ -1,160 +1,173 @@
 {
   "gbfs_url": "https://gbfs.lyft.com/gbfs/1.1/bkn/en/station_information.json",
-  "gbfs_last_updated": 1792129790,
-  "trip_stations": 2478,
-  "gbfs_stations": 2519,
-  "matched_stations": 2456,
-  "match_rate_by_station": 0.9911,
-  "match_rate_by_trips": 0.998,
-  "gbfs_stations_without_trips": 63,
+  "gbfs_last_updated": 1792158774,
+  "months": [
+    "2025-10",
+    "2025-11",
+    "2025-12",
+    "2026-01",
+    "2026-03",
+    "2026-04",
+    "2026-05",
+    "2026-06",
+    "2026-07",
+    "2026-08",
+    "2026-09"
+  ],
+  "trip_stations": 2531,
+  "gbfs_stations": 2518,
+  "matched_stations": 2477,
+  "match_rate_by_station": 0.9787,
+  "match_rate_by_trips": 0.9842,
+  "gbfs_stations_without_trips": 41,
   "gbfs_duplicate_short_names": 0,
-  "matched_name_agreement_rate": 1.0,
+  "matched_name_agreement_rate": 0.9988,
   "matched_distance_m": {
     "median": 0.0,
     "p95": 0.0,
     "over_200m": 0
   },
-  "stations_with_multiple_names": 4,
+  "stations_with_multiple_names": 5,
   "top_unmatched_by_trips": [
+    {
+      "station_id": "5788.13",
+      "name": "Lafayette St & E 8 St",
+      "trips": 123539,
+      "lat": 40.73020660529954,
+      "lng": -73.99102628231049
+    },
+    {
+      "station_id": "6925.09",
+      "name": "2 Ave & E 72 St",
+      "trips": 111665,
+      "lat": 40.7687620293096,
+      "lng": -73.95840793848038
+    },
+    {
+      "station_id": "5847.01",
+      "name": "Christopher St & Greenwich St",
+      "trips": 104885,
+      "lat": 40.73291553,
+      "lng": -74.00711384
+    },
+    {
+      "station_id": "5561.06",
+      "name": "Lafayette St & Jersey St",
+      "trips": 98549,
+      "lat": 40.72456089,
+      "lng": -73.99565293
+    },
     {
       "station_id": "5329.08",
       "name": "Murray St & West St",
-      "trips": 16568,
+      "trips": 70744,
       "lat": 40.71503,
       "lng": -74.01246
     },
     {
-      "station_id": "6332.10",
-      "name": "Broadway & 74 St",
-      "trips": 8131,
-      "lat": 40.74653,
-      "lng": -73.89121
-    },
-    {
-      "station_id": "5256.06",
-      "name": "Vesey St & West St",
-      "trips": 6619,
-      "lat": 40.714063,
-      "lng": -74.014432
-    },
-    {
       "station_id": "7382.04",
       "name": "W 84 St & Columbus Ave",
-      "trips": 5772,
+      "trips": 61929,
       "lat": 40.78499979,
       "lng": -73.97283406
     },
     {
-      "station_id": "3022.01",
-      "name": "Cortelyou Rd & E 19 St",
-      "trips": 4391,
-      "lat": 40.64269,
-      "lng": -73.96099
-    },
-    {
-      "station_id": "6297.08",
-      "name": "W 25 St & 8 Ave",
-      "trips": 2668,
-      "lat": 40.74649996333341,
-      "lng": -73.99732626293645
-    },
-    {
-      "station_id": "1234.56",
-      "name": "Morgan HCT Charging",
-      "trips": 2493,
-      "lat": 40.708948,
-      "lng": -73.932777
-    },
-    {
-      "station_id": "5854.10",
-      "name": "Stuyvesant Walk & 1 Ave Loop",
-      "trips": 2430,
-      "lat": 40.732339777151054,
-      "lng": -73.97898383438587
-    },
-    {
-      "station_id": "3439.03",
-      "name": "Bedford Ave & Clarkson Ave",
-      "trips": 2171,
-      "lat": 40.65519,
-      "lng": -73.9564
-    },
-    {
-      "station_id": "5411.07",
-      "name": "Union Ave & N 12 St",
-      "trips": 1881,
-      "lat": 40.71924,
-      "lng": -73.95242
-    },
-    {
-      "station_id": "SYS038",
-      "name": "Morgan Loading Docks",
-      "trips": 1594,
-      "lat": 40.709306335794274,
-      "lng": -73.93117547035216
-    },
-    {
       "station_id": "6306.07",
       "name": "W 20 St & 11 Ave",
-      "trips": 1385,
+      "trips": 61594,
       "lat": 40.746745,
       "lng": -74.007756
     },
     {
-      "station_id": "6517.08_",
-      "name": "W 42 St & 6 Ave",
-      "trips": 1325,
-      "lat": 40.75496980175467,
-      "lng": -73.98468096052407
+      "station_id": "5256.06",
+      "name": "Vesey St & West St",
+      "trips": 59724,
+      "lat": 40.714062999999996,
+      "lng": -74.014432
+    },
+    {
+      "station_id": "6717.06",
+      "name": "9 Ave & W 45 St",
+      "trips": 59012,
+      "lat": 40.76019252,
+      "lng": -73.99125509999999
+    },
+    {
+      "station_id": "5411.07",
+      "name": "Union Ave & N 12 St",
+      "trips": 57980,
+      "lat": 40.71924,
+      "lng": -73.95242
+    },
+    {
+      "station_id": "5329.03",
+      "name": "West St & Chambers St",
+      "trips": 54886,
+      "lat": 40.71754834,
+      "lng": -74.01322069
+    },
+    {
+      "station_id": "6332.10",
+      "name": "Broadway & 74 St",
+      "trips": 45225,
+      "lat": 40.74653,
+      "lng": -73.89121
+    },
+    {
+      "station_id": "6019.04",
+      "name": "Ash St & Manhattan Ave",
+      "trips": 39383,
+      "lat": 40.738095,
+      "lng": -73.954867
+    },
+    {
+      "station_id": "6297.08",
+      "name": "W 25 St & 8 Ave",
+      "trips": 38024,
+      "lat": 40.74649996333341,
+      "lng": -73.99732626293645
+    },
+    {
+      "station_id": "6170.09",
+      "name": "Jackson Ave & 49 Ave",
+      "trips": 37141,
+      "lat": 40.7429302,
+      "lng": -73.952037
+    },
+    {
+      "station_id": "6847.02",
+      "name": "Broadway & W 56 St",
+      "trips": 36221,
+      "lat": 40.7652654,
+      "lng": -73.98192338
+    },
+    {
+      "station_id": "6644.08",
+      "name": "9 Ave & W 39 St",
+      "trips": 32052,
+      "lat": 40.756403523272496,
+      "lng": -73.99410143494606
     },
     {
       "station_id": "7453.08",
       "name": "W 94 St & Central Park W",
-      "trips": 1112,
+      "trips": 31563,
       "lat": 40.790431,
       "lng": -73.965894
     },
     {
-      "station_id": "5308.04_",
-      "name": "Metropolitan Ave & Bedford Ave ",
-      "trips": 1064,
-      "lat": 40.71534825,
-      "lng": -73.96024116
+      "station_id": "6932.15",
+      "name": "E 68 St & Madison Ave",
+      "trips": 29100,
+      "lat": 40.7691572,
+      "lng": -73.96703464
     },
     {
-      "station_id": "SYS016",
-      "name": "Morgan Bike Mechanics",
-      "trips": 804,
-      "lat": 40.70962789682351,
-      "lng": -73.93145710229872
-    },
-    {
-      "station_id": "4184.08",
-      "name": "President St & Hoyt St",
-      "trips": 667,
-      "lat": 40.680057,
-      "lng": -73.991753
-    },
-    {
-      "station_id": "6569.09_",
-      "name": "W 35 St & 9 Ave",
-      "trips": 410,
-      "lat": 40.75425585988168,
-      "lng": -73.99645123326621
-    },
-    {
-      "station_id": "Shop Morgan ",
-      "name": "Shop Morgan",
-      "trips": 217,
-      "lat": 40.70987333941734,
-      "lng": -73.9315938949585
-    },
-    {
-      "station_id": "SYS033",
-      "name": "Pier 40 X2",
-      "trips": 215,
-      "lat": 40.728486861173785,
-      "lng": -74.01169271324761
+      "station_id": "5872.10",
+      "name": "E 9 St & 5 Ave",
+      "trips": 26861,
+      "lat": 40.73275887045088,
+      "lng": -73.99581670761108
     }
   ],
   "sample_gbfs_without_trips": [
@@ -163,30 +176,6 @@
       "name": "Livonia Ave & Powell St",
       "station_id": "2235294222661977076",
       "capacity": 0
-    },
-    {
-      "short_name": "5216.06",
-      "name": "Vesey St & Church St",
-      "station_id": "06439006-11b6-44f0-8545-c9d39035f32a",
-      "capacity": 78
-    },
-    {
-      "short_name": "7983.02",
-      "name": "Longfellow Ave & Aldus St",
-      "station_id": "1795146692060860976",
-      "capacity": 24
-    },
-    {
-      "short_name": "8575.02",
-      "name": "Cedar Ave & W Fordham Rd",
-      "station_id": "1a083890-e22b-4f81-8d98-567784034916",
-      "capacity": 24
-    },
-    {
-      "short_name": "3576.10",
-      "name": "Rutland Rd & Brooklyn Ave",
-      "station_id": "ea9a19a6-acea-4286-a723-b5481c90a3c0",
-      "capacity": 63
     },
     {
       "short_name": "5653.19",
@@ -199,6 +188,12 @@
       "name": "Suffolk St & Delancey St",
       "station_id": "2263851174204787338",
       "capacity": 62
+    },
+    {
+      "short_name": "5308.08",
+      "name": "Berry St & N 4 St",
+      "station_id": "2263853517922976822",
+      "capacity": 54
     },
     {
       "short_name": "3669.08",
@@ -219,15 +214,15 @@
       "capacity": 0
     },
     {
-      "short_name": "5308.08",
-      "name": "Berry St & N 4 St",
-      "station_id": "2263853517922976822",
-      "capacity": 54
+      "short_name": "5134.11",
+      "name": "Kent Ave & S 10 St",
+      "station_id": "2263847937356951726",
+      "capacity": 81
     },
     {
-      "short_name": "4528.01",
-      "name": "DeKalb Ave & Franklin Ave",
-      "station_id": "a35d03cf-bd72-4da4-a4ac-bd25b3f8dce3",
+      "short_name": "5914.09",
+      "name": "6 Ave & W 9 St",
+      "station_id": "2263851393248119436",
       "capacity": 0
     },
     {
@@ -237,34 +232,16 @@
       "capacity": 0
     },
     {
-      "short_name": "5216.07",
-      "name": "Vesey St & Greenwich St",
-      "station_id": "1989279523593928720",
-      "capacity": 111
-    },
-    {
-      "short_name": "5914.09",
-      "name": "6 Ave & W 9 St",
-      "station_id": "2263851393248119436",
-      "capacity": 0
-    },
-    {
       "short_name": "5869.08",
       "name": "West St & Freeman St",
       "station_id": "2263854882319069738",
       "capacity": 0
     },
     {
-      "short_name": "5134.11",
-      "name": "Kent Ave & S 10 St",
-      "station_id": "2263847937356951726",
-      "capacity": 81
-    },
-    {
-      "short_name": "6801.07",
-      "name": "E 59 St & Lexington Ave",
-      "station_id": "2263850474211027056",
-      "capacity": 56
+      "short_name": "3762.10",
+      "name": "8 Ave & 11 St",
+      "station_id": "2263855303225864754",
+      "capacity": 36
     },
     {
       "short_name": "7685.17",
@@ -273,10 +250,46 @@
       "capacity": 36
     },
     {
-      "short_name": "3762.10",
-      "name": "8 Ave & 11 St",
-      "station_id": "2263855303225864754",
-      "capacity": 36
+      "short_name": "6801.07",
+      "name": "E 59 St & Lexington Ave",
+      "station_id": "2263850474211027056",
+      "capacity": 56
+    },
+    {
+      "short_name": "3780.03",
+      "name": "Pennsylvania Ave & Livonia Ave",
+      "station_id": "2250953149657776624",
+      "capacity": 0
+    },
+    {
+      "short_name": "6881.01",
+      "name": "Main St & River Rd",
+      "station_id": "2263855457844687416",
+      "capacity": 0
+    },
+    {
+      "short_name": "JC141",
+      "name": "Port Liberte Ferry Terminal",
+      "station_id": "2116885590974001526",
+      "capacity": 0
+    },
+    {
+      "short_name": "JC138",
+      "name": "Ocean Ave & New St",
+      "station_id": "2116636101124803154",
+      "capacity": 14
+    },
+    {
+      "short_name": "JC137",
+      "name": "Ferris Triangle Park",
+      "station_id": "2116635993049651742",
+      "capacity": 12
+    },
+    {
+      "short_name": "JC120",
+      "name": "Arlington Ave & Bramhall Ave",
+      "station_id": "2108372562172578194",
+      "capacity": 18
     }
   ]
 }

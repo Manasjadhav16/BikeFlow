@@ -1,12 +1,15 @@
-"""Download NYC Citi Bike monthly trip zips and convert them to Parquet, one month at a time.
+"""Download NYC Citi Bike monthly trip zips and turn each into clean Parquet, one month at a time.
 
 Disk-frugal: CSV members are extracted and ingested one at a time, then deleted;
-the zip is deleted as soon as the month is converted. Months whose partition has
-a _BIKEFLOW_DONE marker are skipped, so re-running resumes where it stopped.
+the zip is deleted as soon as the month is converted. Each month is then inspected,
+cleaned and verified by src.clean.process_month, which deletes the raw Parquet
+(or quarantines a partial month). Months already in trips_clean are skipped, and a
+converted-but-uncleaned month is cleaned without re-downloading, so re-running resumes.
 
 Usage:
     python scripts/download_trips.py --months 2026-07 2026-08 2026-09
-    python scripts/download_trips.py --latest 3
+    python scripts/download_trips.py --latest 12
+    python scripts/download_trips.py --months 2026-04 --include 2026-04   # accept a flagged month
 """
 import argparse
 import re
@@ -22,8 +25,9 @@ import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.common import (DATA_RAW, METRICS_DIR, TRIPS_DIR, check_disk, dir_size_bytes,  # noqa: E402
-                        get_spark, write_json)
+from src.clean import CLEAN_MARKER, process_month as clean_month  # noqa: E402
+from src.common import (DATA_RAW, RAW_SIZES_JSON, TRIPS_CLEAN_DIR, TRIPS_DIR, check_disk,  # noqa: E402
+                        dir_size_bytes, get_spark, read_json, write_json)
 from src.ingest import EXPECTED_COLUMNS, ingest_csvs  # noqa: E402
 
 BUCKET_URL = "https://s3.amazonaws.com/tripdata"
@@ -32,7 +36,6 @@ MONTHLY_KEY = re.compile(r"^(\d{4})(\d{2})-citibike-tripdata(?:\.csv)?\.zip$")
 # The new schema (ride_id, rideable_type, ...) starts in Feb 2021.
 NEW_SCHEMA_FROM = "2021-02"
 DONE_MARKER = "_BIKEFLOW_DONE"
-RAW_SIZES_JSON = METRICS_DIR / "raw_sizes.json"
 
 
 def list_monthly_keys() -> dict[str, dict]:
@@ -58,9 +61,17 @@ def list_monthly_keys() -> dict[str, dict]:
             return found
 
 
-def partition_dir(ym: str) -> Path:
+def partition_dir(ym: str, base: Path = TRIPS_DIR) -> Path:
     y, m = ym.split("-")
-    return TRIPS_DIR / f"year={int(y)}" / f"month={int(m)}"
+    return base / f"year={int(y)}" / f"month={int(m)}"
+
+
+def month_state(ym: str) -> str:
+    if (partition_dir(ym, TRIPS_CLEAN_DIR) / CLEAN_MARKER).exists():
+        return "clean"
+    if (partition_dir(ym) / DONE_MARKER).exists():
+        return "converted"
+    return "todo"
 
 
 def download(url: str, dest: Path, expected: int, retries: int = 8) -> None:
@@ -112,12 +123,7 @@ def check_header(zf: zipfile.ZipFile, info: zipfile.ZipInfo) -> None:
         raise ValueError(f"{info.filename} is not the new schema: {cols}")
 
 
-def load_raw_sizes() -> dict:
-    import json
-    return json.loads(RAW_SIZES_JSON.read_text()) if RAW_SIZES_JSON.exists() else {}
-
-
-def process_month(spark, ym: str, entry: dict) -> None:
+def convert_month(spark, ym: str, entry: dict) -> None:
     part = partition_dir(ym)
     if part.exists():
         print(f"  removing partial partition {part}")
@@ -150,12 +156,12 @@ def process_month(spark, ym: str, entry: dict) -> None:
             print(f"  [{i}/{len(members)}] {out.name}: {size / 1e6:.0f} MB csv -> parquet, csv deleted")
 
     rows = spark.read.parquet(str(part)).count()
-    sizes = load_raw_sizes()
+    sizes = read_json(RAW_SIZES_JSON)
     sizes[ym] = {
         "key": entry["key"],
         "zip_bytes": zip_path.stat().st_size,
         "csv_bytes": csv_total,
-        "parquet_bytes": dir_size_bytes(part),
+        "raw_parquet_bytes": dir_size_bytes(part),
         "csv_members": members_log,
         "rows": rows,
         "converted_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -165,7 +171,7 @@ def process_month(spark, ym: str, entry: dict) -> None:
     (part / DONE_MARKER).touch()
     s = sizes[ym]
     print(f"  {ym}: {rows:,} rows | zip {s['zip_bytes'] / 1e6:.0f} MB, csv {csv_total / 1e6:.0f} MB, "
-          f"parquet {s['parquet_bytes'] / 1e6:.0f} MB | zip deleted")
+          f"raw parquet {s['raw_parquet_bytes'] / 1e6:.0f} MB | zip deleted")
 
 
 def main() -> None:
@@ -173,6 +179,8 @@ def main() -> None:
     g = p.add_mutually_exclusive_group(required=True)
     g.add_argument("--months", nargs="+", help="YYYY-MM months to fetch")
     g.add_argument("--latest", type=int, help="fetch the N most recent available months")
+    p.add_argument("--include", nargs="*", default=[], metavar="YYYY-MM",
+                   help="clean these months even if inspection flags them as partial")
     p.add_argument("--list", action="store_true", help="only print what would be done")
     a = p.parse_args()
 
@@ -187,10 +195,10 @@ def main() -> None:
         if bad or missing or old:
             sys.exit(f"invalid months: format={bad} not_in_bucket={missing} old_schema={old}")
 
-    todo = [m for m in months if not (partition_dir(m) / DONE_MARKER).exists()]
+    states = {m: month_state(m) for m in months}
+    todo = [m for m in months if states[m] != "clean"]
     for m in months:
-        state = "todo" if m in todo else "done, skipping"
-        print(f"{m}: {available[m]['key']} ({available[m]['size'] / 1e6:.0f} MB) -> {state}")
+        print(f"{m}: {available[m]['key']} ({available[m]['size'] / 1e6:.0f} MB) -> {states[m]}")
     if a.list or not todo:
         return
 
@@ -198,7 +206,9 @@ def main() -> None:
     try:
         for m in todo:
             print(f"== {m}")
-            process_month(spark, m, available[m])
+            if states[m] == "todo":
+                convert_month(spark, m, available[m])
+            clean_month(spark, m, include=m in a.include)
     finally:
         spark.stop()
     check_disk("download finished")
