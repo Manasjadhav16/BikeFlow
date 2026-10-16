@@ -1,0 +1,21 @@
+{
+  "source": "https://archive-api.open-meteo.com/v1/archive",
+  "lat": 40.71,
+  "lon": -74.01,
+  "timezone": "America/New_York",
+  "hours": 8760,
+  "first_utc": "2025-10-01 04:00:00",
+  "last_utc": "2026-10-01 03:00:00",
+  "hour_gaps": 0,
+  "missing_values": {
+    "temperature_2m": 0,
+    "precipitation": 0,
+    "wind_speed_10m": 0
+  },
+  "precip_hours_gt_0": 1371,
+  "max_hourly_precip_mm": 15.0,
+  "temp_range_c": [
+    -18.3,
+    40.7
+  ]
+}

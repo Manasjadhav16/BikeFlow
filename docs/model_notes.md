@@ -1,4 +1,11 @@
-# Model notes: Stage 2 demand model
+# Model notes: Stage 2 / 2b demand models
+
+> **Stage 2b bottom line (see §9):** modelling departures and arrivals separately, with
+> weather, gives a small gain in count accuracy on the test month but **does not beat the
+> historical-average baseline on the alert events it was built for.** The historical
+> average has higher average precision and higher recall at 60%/70% precision for every
+> strong-drain threshold and for strong fills at k = 2 and 3, and it is better calibrated.
+> Weather helps clearly only on disrupted (storm/holiday) days.
 
 **Bottom line:** the best model (random forest) beats the historical-average baseline by
 only **1.5% MAE** on the test month and is **slightly worse on RMSE**. Most of what it
@@ -166,3 +173,133 @@ come in Stage 3.
 - **Rebuild:** `scripts/run_stage2.sh`. It runs `src.build_features`,
   `src.train_model --sample-pct 20`, `src.eval_alerts` and `src.model_charts`,
   and stops at the first failing step.
+
+## 9. Stage 2b: departures/arrivals, weather, and event probabilities
+
+### What changed
+- **Targets:** expected departures and expected arrivals over the next 30 min, as two GBT
+  regressors with predictions clipped at 0.
+- **New features** (`src/build_features.py`):
+  - `bike_change_last_60m`;
+  - `cell_bike_change_last_30m`, the mean last-30-min change of the *other* stations in
+    the same ~500 m grid cell. It raised build time 1.6× (54 s vs 34 s per month, under the
+    2× limit), so it was kept;
+  - `is_holiday`;
+  - weather at the prediction time: `temperature_2m`, `precipitation` and `wind_speed_10m`
+    from the latest hourly record at or before `ts`, plus `precip_last_3h`.
+
+  Sources and timing rules are in `docs/data_notes.md` §9. Live prediction will use the
+  Open-Meteo forecast endpoint's `current` values, mapped the same way.
+- **Event probabilities:** with D ~ Poisson(μ_dep) and A ~ Poisson(μ_arr) assumed
+  independent, D − A is Skellam. P(strong drain_k) = P(D − A ≥ k) and
+  P(strong fill_k) = P(A − D ≥ k) for k = 2, 3, 5 (`src/eval_flow.py`, scipy).
+- **Comparisons:** the same Skellam construction is fed by
+  - (a) the historical station × weekday × hour mean departures/arrivals (training months;
+    weekday × hour fallback for 222,702 test rows at new stations);
+  - (b) persistence: last-30-min departures/arrivals;
+  - (c) the Stage 2 random forest's *net* prediction n, with the historical total T:
+    T' = max(T, |n|), μ_arr = (T' + n)/2, μ_dep = (T' − n)/2.
+
+### Training budget (90-minute limit) and what it changed
+- **Weather models:** 20% station-day sample (10,771,345 rows, the same sample as Stage 2),
+  60 iterations, depth 6. A 1-month dry run projected 13 min per model. The real fits took
+  20.5 min (departures) and 18.5 min (arrivals): one month didn't scale linearly to nine,
+  but both stayed under the 25-min limit, so nothing was shrunk. Peak RSS 2.9 GB, swap flat
+  at 1.0 GB.
+- **No-weather ablation:** **10% sample (5,370,071 rows) and 40 iterations**, about 3.7 min
+  each, as instructed for time. **The ablation therefore changes three things at once
+  (weather, sample size, iterations).** The "weather effect" below is an upper bound on what
+  weather alone adds, not a clean measurement.
+- A separate dry run for the ablation was skipped: its workload is a strict subset of the
+  timed weather run (half the rows, two-thirds of the iterations).
+
+### Results (test = Sep 2026, disrupted rows excluded; validation in `flow_eval.json`)
+
+**Poisson deviance per row** (lower is better; μ floored at 0.01):
+
+| approach | departures (test) | arrivals (test) | departures (val) | arrivals (val) |
+|---|---:|---:|---:|---:|
+| GBT dep/arr + weather | **1.395** | **1.380** | 1.418 | 1.396 |
+| GBT dep/arr, no weather (ablation) | 1.430 | 1.423 | 1.450 | 1.441 |
+| historical average | 1.415 | 1.417 | **1.381** | **1.383** |
+| Stage 2 net + historical total | 1.466 | 1.458 | 1.416 | 1.412 |
+| persistence | 2.616 | 2.597 | 2.676 | 2.658 |
+
+**Strong drain / fill events.** Average precision (AP), then recall at 60% and 70% precision:
+
+| event (test) | base rate | GBT + weather | GBT no weather | historical avg | Stage 2 net | persistence |
+|---|---:|---|---|---|---|---|
+| drain k=2 | 10.5% | 0.366 / 0.11 / 0.06 | 0.354 / 0.10 / 0.05 | **0.398 / 0.16 / 0.09** | 0.385 / 0.15 / 0.08 | 0.246 / 0.02 / 0.01 |
+| drain k=3 | 5.7% | 0.327 / 0.11 / 0.06 | 0.316 / 0.10 / 0.04 | **0.364 / 0.15 / 0.09** | 0.351 / 0.14 / 0.08 | 0.215 / 0.03 / 0.01 |
+| drain k=5 | 2.2% | 0.284 / 0.10 / 0.04 | 0.274 / 0.08 / 0.03 | **0.331 / 0.16 / 0.09** | 0.315 / 0.14 / 0.06 | 0.187 / 0.03 / 0.00 |
+| fill k=2 | 10.2% | 0.353 / 0.10 / 0.06 | 0.350 / 0.09 / 0.06 | **0.381** / 0.13 / 0.07 | 0.375 / 0.13 / **0.08** | 0.237 / 0.02 / 0.00 |
+| fill k=3 | 5.6% | 0.329 / 0.12 / 0.08 | 0.320 / 0.11 / 0.08 | **0.351** / 0.13 / 0.07 | 0.350 / **0.14 / 0.09** | 0.209 / 0.02 / 0.00 |
+| fill k=5 | 2.2% | 0.321 / 0.17 / 0.12 | 0.308 / 0.16 / 0.11 | 0.330 / 0.16 / 0.09 | **0.338 / 0.19 / 0.13** | 0.188 / 0.02 / 0.00 |
+
+The validation month (August) gives the same ranking: at k=3, the historical average has AP
+0.342 for drains and 0.338 for fills, against 0.302 and 0.309 for the model.
+
+**Calibration** (`outputs/charts/calibration_k3.png`): the historical average is close to the
+diagonal. The GBT model is **overconfident** above about 0.2: strong-drain predictions of 0.85
+happen 70% of the time, and predictions of 0.45 happen 31% of the time. Persistence is badly
+overconfident.
+
+**Disrupted rows only** (test, 460,957 rows: Sep 26–27): departure deviance is GBT + weather
+0.957, no weather 1.260, historical average 1.195. This is the one place where weather
+clearly helps. Event AP is low for every approach on those days (drain k=3: 0.09–0.11).
+
+**Ablation (with vs without weather):**
+- **Deviance:** with weather is 2.5–3% lower on both months.
+- **Event AP:** +0.003 to +0.013 at every threshold.
+- **Importance:** weather features take about 8% of the GBT importance, mostly
+  `temperature_2m` (6.5–7.1%). Precipitation is about 1%.
+
+The ablation also used half the sample and two-thirds of the iterations (see above), so the
+true weather-only effect is at most that size.
+
+### Honest conclusion
+- **Improved:**
+  - Count accuracy on the test month: GBT + weather has 1.5% (departures) and 2.6%
+    (arrivals) lower Poisson deviance than the historical average.
+  - Large improvements on disrupted days, where weather explains the drop in demand
+    (see `rain_vs_dry_day.png`: on the 16.7 mm rainy afternoon the historical average
+    expects the usual ~26-departure evening peak and the weather model expects ~5–10;
+    actual was ~3).
+  - Every model and baseline beats persistence by a wide margin.
+- **Did not improve:**
+  - **Event detection.** On the drain and fill events that alerts depend on, **the model
+    does not beat the historical-average baseline**: its AP is 2–5 points lower, its recall
+    at 70% precision is lower for every drain threshold, and it is worse calibrated.
+  - The count gain is **not robust**: on the validation month the historical average has
+    the lower deviance (1.381 vs 1.418 for departures).
+  - Modelling departures/arrivals separately (the new target) did not beat Stage 2's net
+    model plus the historical total on events either (Stage 2 net is better or equal at
+    every threshold).
+- **Likely reasons:**
+  - The GBT is trained with squared loss, which shrinks counts toward the mean (it
+    under-predicts peaks on normal days) and gives poorly separated μ pairs.
+  - Skellam assumes independent Poisson counts, but group rides and commute waves are
+    overdispersed and correlated, which inflates the model's extreme probabilities. The
+    historical mean is a long-run average of exactly that behaviour, which is why it
+    stays calibrated.
+  - Even with the true means, Poisson randomness caps AP for a 30-minute event (a
+    synthetic check with true μ reached AP 0.63 at a 8.5% base rate).
+- **Recommendation for Stage 3:**
+  - Use the **historical average (Skellam) as the event-probability baseline in production**.
+  - Keep the GBT + weather as a *correction* on disrupted / bad-weather days, or try:
+    a Poisson or Tweedie objective (not available for GBT in Spark MLlib; GLM or LightGBM),
+    blending with the historical mean, and recalibrating probabilities (isotonic regression
+    on the validation month).
+  - Live stock (bikes/docks available) still has to be combined with these flow
+    probabilities to get actual empty/full risk.
+
+### Stage 2b artifacts
+- **Models:** `models/flow/{weather,no_weather}_{departures,arrivals}/` (Spark pipelines) and
+  `models/hist_flow_baseline/` (station × weekday × hour sums for the baseline).
+- **Metrics:** `outputs/metrics/flow_eval.json` (all metrics, both months, disrupted
+  separately), `flow_pr_curves_k3_test.json`, `flow_training.json` (timings, dry run),
+  `flow_feature_importances.json`, `weather_summary.json`.
+- **Charts:** `outputs/charts/pr_curves_k3.png`, `calibration_k3.png`,
+  `flow_feature_importances.png`, `rain_vs_dry_day.png`.
+- **Rebuild:** `scripts/run_stage2b.sh`. It's fail-fast and prints timestamped start and end
+  lines for each step.

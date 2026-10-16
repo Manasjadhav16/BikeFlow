@@ -199,3 +199,36 @@ aggregates are combined in pandas. Cross-month duplicates are checked exactly
 with adjacent-month joins. A full rebuild (`scripts/build_features.sh`) takes
 about 4 minutes, with peak RSS under 1.9 GB and no swap growth. Per-month timings
 are in `outputs/metrics/build_progress.json`.
+
+## 9. Weather and holidays (Stage 2b)
+
+**Weather**, `src/weather.py` → `data/processed/weather/weather_hourly.parquet`:
+- **Source:** the Open-Meteo archive API (no key), lat 40.71, lon −74.01,
+  `timezone=America/New_York`, 2025-10-01 – 2026-09-30.
+- **Variables:** hourly `temperature_2m` (°C), `precipitation` (mm, the sum over the
+  **preceding** hour) and `wind_speed_10m` (km/h).
+- **Coverage:** 8,760 hours, no gaps, no missing values; 1,371 hours with rain, max
+  15 mm/h, −18.3 to 40.7 °C (`outputs/metrics/weather_summary.json`).
+- **Timestamps:** fetched as unix time (`timeformat=unixtime`), so daylight-saving
+  changes can't create duplicate or missing local hours. Features join on epoch seconds.
+  This matters: a join through naive timestamps silently returned no matches at all,
+  and was caught in the dry run.
+- **How a prediction at `ts` uses weather:** it takes the hourly record at the latest
+  hour mark at or before `ts`. Its temperature and wind are instantaneous at that mark,
+  and its precipitation covers the hour before it, so all of it is in the past.
+  `precip_last_3h` sums the three hourly values ending at that mark.
+- **Live prediction (Stage 3)** will use the Open-Meteo **forecast** endpoint's `current`
+  values (`temperature_2m`, `precipitation`, `wind_speed_10m`), mapped the same way. The
+  archive is reanalysis (smoothed, after the fact), while live values are near-real-time
+  model output. Expect some train/live mismatch, especially for convective summer showers.
+
+**US federal holidays** (`federal_holidays()` in `src/build_features.py`) are computed from
+the federal rules, not a package:
+- **Fixed-date holidays:** New Year's Day, Juneteenth, Independence Day, Veterans Day,
+  Christmas. When one falls on a weekend, both the actual and the observed date are flagged.
+- **Weekday-rule holidays:** MLK Day, Presidents Day, Memorial Day, Labor Day, Columbus Day,
+  Thanksgiving.
+- **The study period** includes 2025-10-13, 11-11, 11-27, 12-25, 2026-01-01, 01-19, 02-16,
+  05-25, 06-19, 07-03 (observed) + 07-04, and 09-07.
+- **Holidays vs disrupted days:** Christmas and New Year's Day are also disrupted days (§7),
+  so they're excluded from training. The feature mostly teaches the other holidays.
