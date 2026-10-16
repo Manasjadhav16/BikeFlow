@@ -1,0 +1,40 @@
+{
+  "run": {
+    "start_utc": "2026-10-16T17:43:45Z",
+    "stop_utc": "2026-10-16T17:52:47Z",
+    "elapsed_s": 541.9,
+    "command": "python -m src.collector --max-minutes 10"
+  },
+  "polls": 10,
+  "polls_failed_or_skipped": 0,
+  "polls_feed_unchanged": 5,
+  "retries": 0,
+  "rows_written": 11391,
+  "rows_skipped_unchanged": 13789,
+  "rows_kept_per_poll": [
+    0,
+    1721,
+    0,
+    2429,
+    0,
+    2421,
+    0,
+    2377,
+    0,
+    2443
+  ],
+  "latency_ms": {
+    "mean": 980,
+    "min": 189,
+    "max": 1771
+  },
+  "parquet_files": 2,
+  "parquet_bytes": 141161,
+  "bytes_per_hour": 937774,
+  "projected_mb_per_day": 22.5,
+  "station_info_mb_per_day": 1.3,
+  "process": {
+    "rss_mb": 78,
+    "cpu_s_first_71s": 0.37
+  }
+}

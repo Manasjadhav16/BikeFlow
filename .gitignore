@@ -5,3 +5,6 @@ __pycache__/
 *.zip
 *.csv
 *.log
+
+# live collector health log (grows every minute; summary in collector_test_run.json)
+outputs/metrics/*.jsonl
