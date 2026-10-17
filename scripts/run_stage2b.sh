@@ -35,5 +35,5 @@ step "GBT departures (no weather)" src.train_flow --target departures --variant 
 step "GBT arrivals (no weather)"   src.train_flow --target arrivals   --variant no_weather --sample-pct 10 --max-iter 40 --max-depth 6
 step "evaluation (Skellam)" src.eval_flow
 step "charts" src.flow_charts
-[ -d data/tmp_spark ] && echo "warning: data/tmp_spark left behind" >&2 || true
+[ -n "$(ls -A data/tmp_spark 2>/dev/null)" ] && echo "warning: leftover Spark scratch dirs in data/tmp_spark" >&2 || true
 echo "[$(date +%H:%M:%S)] DONE stage 2b"

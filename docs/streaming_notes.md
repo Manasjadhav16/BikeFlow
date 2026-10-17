@@ -226,3 +226,16 @@ How to read this (one hour, one afternoon, so indicative only):
   tuning, covering mornings, nights, weekends and rain.
 - **Replay start-up:** early batches have a "now" slightly before the first poll (17:57).
   Old reports from rarely-reporting stations are replayed first. Scoring starts at the first poll.
+
+## Incident: shared Spark scratch directory (fixed in Stage 4)
+
+All Spark jobs used to share `data/tmp_spark` as `spark.local.dir`, and `stop_spark()` deleted
+that whole directory. When a second job (the replay build for the dashboard) finished while the
+live alert engine was running, its cleanup deleted the live job's shuffle files. The live job then
+failed with `FileNotFoundException` on its next micro-batch, on 2026-10-17 at about 07:21 IST.
+
+**Fix** (`src/common.py`): every Spark process now uses its own subdirectory,
+`data/tmp_spark/<app>-<pid>`, and `stop_spark()` deletes only that one. Verified by planting another
+job's file and confirming it survives a session's cleanup. A live engine started with the old code
+must be restarted to pick up the fix: `scripts/start_stream.sh`. Its old checkpoint resumes where it
+stopped.

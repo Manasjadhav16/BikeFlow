@@ -76,7 +76,10 @@ def get_spark(app_name: str, driver_memory: str = "3g", cores: int = 3, shuffle_
     os.environ.setdefault("PYSPARK_DRIVER_PYTHON", sys.executable)
     from pyspark.sql import SparkSession
 
-    SPARK_TMP.mkdir(parents=True, exist_ok=True)
+    # Each Spark process gets its own scratch dir: a shared one let one job's cleanup delete
+    # another running job's shuffle files (it crashed the live stream once).
+    local_dir = SPARK_TMP / f"{app_name}-{os.getpid()}"
+    local_dir.mkdir(parents=True, exist_ok=True)
     builder = (
         SparkSession.builder.appName(app_name)
         .master(f"local[{cores}]")
@@ -85,7 +88,7 @@ def get_spark(app_name: str, driver_memory: str = "3g", cores: int = 3, shuffle_
         .config("spark.sql.shuffle.partitions", str(shuffle_partitions))
         .config("spark.sql.files.maxPartitionBytes", "64m")
         .config("spark.sql.adaptive.enabled", "true")
-        .config("spark.local.dir", str(SPARK_TMP))
+        .config("spark.local.dir", str(local_dir))
         .config("spark.sql.parquet.compression.codec", "zstd")
         .config("spark.ui.showConsoleProgress", "false")
     )
@@ -93,13 +96,16 @@ def get_spark(app_name: str, driver_memory: str = "3g", cores: int = 3, shuffle_
         builder = builder.config("spark.jars.packages", packages)
     spark = builder.getOrCreate()
     spark.sparkContext.setLogLevel("ERROR")
+    spark._bikeflow_local_dir = local_dir
     return spark
 
 
 def stop_spark(spark) -> None:
-    """Stop Spark and delete its scratch dir (shuffle/spill files)."""
+    """Stop Spark and delete ONLY this session's scratch dir (never other jobs' shuffle files)."""
+    local_dir = getattr(spark, "_bikeflow_local_dir", None)
     spark.stop()
-    shutil.rmtree(SPARK_TMP, ignore_errors=True)
+    if local_dir is not None:
+        shutil.rmtree(local_dir, ignore_errors=True)
 
 
 def swap_used_gb() -> float:

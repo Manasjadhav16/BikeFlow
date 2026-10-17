@@ -23,5 +23,5 @@ step() {
 step src.stations
 step src.aggregate_demand
 step src.clean --summary-only
-[ -d data/tmp_spark ] && echo "warning: data/tmp_spark left behind" >&2 || true
+[ -n "$(ls -A data/tmp_spark 2>/dev/null)" ] && echo "warning: leftover Spark scratch dirs in data/tmp_spark" >&2 || true
 echo "=== done"

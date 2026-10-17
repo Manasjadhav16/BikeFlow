@@ -49,7 +49,7 @@ def load(part: Path) -> pd.DataFrame:
     return df
 
 
-def rows_in_order(source: Path, stats: dict):
+def rows_in_order(source: Path, stats: dict, lo: int | None = None, hi: int | None = None):
     """Yield rows sorted by last_reported across hour partitions (one-partition lookahead)."""
     pending = pd.DataFrame()
     parts = partitions(source)
@@ -59,6 +59,13 @@ def rows_in_order(source: Path, stats: dict):
             continue
         stats["skipped_stale"] += int(df["_stale"].sum())
         df = df[~df["_stale"]].drop(columns="_stale")
+        if lo is not None or hi is not None:  # event-time window (polls outside it are skipped)
+            f = epoch_s(df["fetched_at"])
+            inside = (f >= (lo or 0)) & (f < (hi or 2**62))
+            stats["skipped_window"] += int((~inside).sum())
+            df = df[inside]
+            if df.empty:
+                continue
         pending = pd.concat([pending, df], ignore_index=True) if len(pending) else df
         last = i == len(parts) - 1
         # Rows earlier than everything in the next partition can be emitted safely.
@@ -97,10 +104,14 @@ def main() -> None:
     ap.add_argument("--topic", default="station_status")
     ap.add_argument("--bootstrap", default="localhost:9092")
     ap.add_argument("--speed", type=float, default=60.0, help="x real time; 0 = as fast as possible")
+    ap.add_argument("--start", help="only polls at/after this UTC time (ISO), e.g. 2026-10-16T20:00:00Z")
+    ap.add_argument("--end", help="only polls before this UTC time (ISO)")
     a = ap.parse_args()
+    lo = int(epoch_s(pd.Series([a.start]))[0]) if a.start else None
+    hi = int(epoch_s(pd.Series([a.end]))[0]) if a.end else None
 
     from confluent_kafka import Producer
-    stats = {"sent": 0, "delivered": 0, "failed": 0, "skipped_stale": 0}
+    stats = {"sent": 0, "delivered": 0, "failed": 0, "skipped_stale": 0, "skipped_window": 0}
 
     def delivered(err, _msg):
         stats["failed" if err else "delivered"] += 1
@@ -109,11 +120,11 @@ def main() -> None:
                   "broker.address.family": "v4",
                   "compression.type": "zstd", "queue.buffering.max.messages": 500_000})
     t_wall0, t_event0, first_ev, last_ev = time.monotonic(), None, None, None
-    fp = first_poll(a.source)
+    fp = lo or first_poll(a.source)
     anchor = fp - 900 if fp else None
     print(f"[{datetime.now():%H:%M:%S}] replay START source={a.source} topic={a.topic} speed={a.speed:g}x",
           flush=True)
-    for row in rows_in_order(a.source, stats):
+    for row in rows_in_order(a.source, stats, lo, hi):
         ev = int(row["last_reported"])
         if t_event0 is None:
             t_event0, first_ev = (max(ev, anchor) if anchor else ev), ev

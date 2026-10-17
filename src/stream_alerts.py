@@ -102,8 +102,9 @@ def station_state(key, pdfs, state):
 class AlertEngine:
     """Driver-side part of foreachBatch: latest state, expected demand, Skellam, sinks."""
 
-    def __init__(self, out_dir: Path, bootstrap: str, alert_topic: str | None):
+    def __init__(self, out_dir: Path, bootstrap: str, alert_topic: str | None, state_history: bool = False):
         self.out_dir = out_dir
+        self.state_history = state_history  # also keep every batch's full state (replay/demo time slider)
         (out_dir / "alerts").mkdir(parents=True, exist_ok=True)
         exp = pd.read_parquet(REF_DIR / "expected_demand.parquet")
         self.meta = pd.read_parquet(REF_DIR / "stations_live.parquet").set_index("gbfs_station_id")
@@ -215,6 +216,10 @@ class AlertEngine:
         tmp = self.out_dir / ".latest_state.parquet.tmp"
         st.to_parquet(tmp, index=False)
         tmp.replace(self.out_dir / "latest_state.parquet")
+        if self.state_history:
+            h = self.out_dir / "state_history"
+            h.mkdir(exist_ok=True)
+            st.to_parquet(h / f"batch-{batch_id:06d}.parquet", index=False)
 
         dur = time.time() - t0
         self.durations.append(dur)
@@ -257,6 +262,8 @@ def main() -> None:
     ap.add_argument("--out-dir", type=Path, default=ROOT / "data" / "live")
     ap.add_argument("--checkpoint", type=Path, default=ROOT / "data" / "checkpoints" / "stream_alerts")
     ap.add_argument("--available-now", action="store_true", help="process what is in Kafka, then stop (tests)")
+    ap.add_argument("--state-history", action="store_true",
+                    help="also write every batch's full station state to <out>/state_history/ (replay demos)")
     ap.add_argument("--stop-when-idle", type=int, metavar="SECONDS",
                     help="stop when no station update has arrived for this many seconds, once data was "
                          "seen (replay tests). Spark runs no micro-batch when Kafka has no new data, so this "
@@ -265,7 +272,7 @@ def main() -> None:
 
     check_disk("stream_alerts")
     out_dir = a.out_dir.resolve()
-    engine = AlertEngine(out_dir, a.bootstrap, a.alert_topic or None)
+    engine = AlertEngine(out_dir, a.bootstrap, a.alert_topic or None, state_history=a.state_history)
     spark = get_spark("bikeflow-stream-alerts", driver_memory="2g", cores=2, shuffle_partitions=16,
                       packages=KAFKA_PKG)
     print(f"[{datetime.now():%H:%M:%S}] alert engine START: topic {a.topic} ({a.starting_offsets}), "

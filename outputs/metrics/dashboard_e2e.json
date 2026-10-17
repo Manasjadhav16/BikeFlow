@@ -1,0 +1,80 @@
+{
+  "screenshots": [
+    "docs/screenshots/01_live_map.png",
+    "docs/screenshots/02_replay_mode.png",
+    "docs/screenshots/03_station_drawer.png",
+    "docs/screenshots/04_alerts.png",
+    "docs/screenshots/05_prediction_vs_reality.png",
+    "docs/screenshots/06_insights.png",
+    "docs/screenshots/06b_insights_models.png",
+    "docs/screenshots/07_how_it_works.png",
+    "docs/screenshots/08_live_map_1366x768.png"
+  ],
+  "pages": {
+    "map_load_s": 1.87,
+    "/alerts": 1.71,
+    "/reality": 1.65,
+    "/insights": 1.71,
+    "/how": 1.55
+  },
+  "stations_on_map": 2429,
+  "smoothness_live": {
+    "pan": {
+      "fps": 20.3,
+      "p95_frame_ms": 66.7,
+      "long_frames_over_50ms": 12,
+      "frames": 61
+    },
+    "zoom": {
+      "fps": 16,
+      "p95_frame_ms": 83.4,
+      "long_frames_over_50ms": 52,
+      "frames": 77
+    }
+  },
+  "smoothness_replay": {
+    "pan": {
+      "fps": 16.6,
+      "p95_frame_ms": 66.7,
+      "long_frames_over_50ms": 35,
+      "frames": 50
+    }
+  },
+  "drawer_sentence": "99% chance this station fills up (no free docks) within 30 minutes",
+  "memory_mb": {
+    "dashboard backend (uvicorn)": 52,
+    "dashboard frontend (vite)": 52,
+    "headless chromium (test)": 608,
+    "alert engine (Spark JVM)": 557,
+    "alert engine (python driver)": 65,
+    "Kafka broker": 153,
+    "collector": 30,
+    "Spark JVMs (all)": 557
+  },
+  "console_errors": [],
+  "smoothness_notes": {
+    "headless_shell_software_rendering": {
+      "with_dark_tile_filter": {
+        "pan_fps": 20.3,
+        "zoom_fps": 17.8
+      },
+      "tile_filter_off": {
+        "pan_fps": 43.3,
+        "zoom_fps": 31.3
+      }
+    },
+    "installed_chrome_gpu": {
+      "with_dark_tile_filter": {
+        "pan_fps": 57.6,
+        "zoom_fps": 59.0,
+        "p95_frame_ms": 16.8
+      },
+      "tile_filter_off": {
+        "pan_fps": 60.0,
+        "zoom_fps": 59.9
+      }
+    },
+    "stations_drawn": 2429,
+    "conclusion": "the CSS tile filter is expensive only in software rendering; with GPU compositing the full map runs at ~60 fps"
+  }
+}
