@@ -239,3 +239,33 @@ failed with `FileNotFoundException` on its next micro-batch, on 2026-10-17 at ab
 job's file and confirming it survives a session's cleanup. A live engine started with the old code
 must be restarted to pick up the fix: `scripts/start_stream.sh`. Its old checkpoint resumes where it
 stopped.
+
+## Incident: engine would not restart (`KeyError: ['n_obs'] not in index`), fixed
+
+**Cause:** on start, `AlertEngine` seeds its station table from the previous
+`data/live/latest_state.parquet`. It selected the stateful step's *raw* output columns from that
+file, but the file holds the *processed* table, which has no `n_obs`. Every restart after a
+successful run therefore crashed at startup, before Spark touched the checkpoint. That's why a
+fresh checkpoint didn't help. It dates from Stage 3b and was hidden because every earlier start used
+an empty output folder.
+
+**Fixes** (`src/stream_alerts.py`, `scripts/start_stream.sh`):
+- **`seed_latest()`:** takes the columns that exist, fills the missing ones with defaults
+  (`n_obs = 0`, changes null), and starts empty (with a log line) if the file is unreadable.
+- **`read_state()`:** the stateful step tolerates a missing, shorter or older state tuple and an
+  invalid history string. Missing input columns from older producers get defaults.
+- **State version stamp:** the checkpoint carries a stamp (`bikeflow_state_version`, currently
+  `2`). A checkpoint stamped with another version is moved aside to
+  `<checkpoint>.incompatible-<time>` before the query starts. Bump `STATE_VERSION` when the state
+  schema changes.
+- **`start_stream.sh` checks startup:** if the engine dies, it prints the first error line and the
+  last 15 log lines (Java stack frames omitted). If the failure is checkpoint-related, it moves the
+  checkpoint aside (never deletes it) and retries once. It also works with macOS's bash 3.2 when
+  no arguments are given.
+- **Cleanup on failure:** the engine always stops Spark in a `finally` block, so a query that fails to start
+  no longer leaves its scratch folder behind in `data/tmp_spark/`.
+- **Verified on 2026-10-17:** the live engine restarted, seeding 2,429 stations from the old
+  `latest_state.parquet` (the crash path). It produced alerts for over 10 minutes, and it kept running while the
+  replay rebuild's Spark job finished and cleaned up, which is the scenario that crashed it before.
+- **Tests:** `tests/test_stream_alerts.py` (Spark-free; seeding, old/broken state, missing input
+  columns, checkpoint guard). Run with `.venv/bin/python tests/test_stream_alerts.py`.

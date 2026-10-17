@@ -55,6 +55,14 @@ IN_SCHEMA = ("fetched_at string, station_id string, num_bikes_available int, num
 STATE_SCHEMA = "hist string, ebikes int, installed boolean, renting boolean, returning boolean"
 OUT_SCHEMA = ("station_id string, last_reported long, bikes int, docks int, ebikes int, is_installed boolean, "
               "is_renting boolean, is_returning boolean, change_5m int, change_15m int, change_30m int, n_obs int")
+STATE_FIELDS = [c.split()[0] for c in STATE_SCHEMA.split(", ")]
+OUT_SCHEMA_COLS = [c.split()[0] for c in OUT_SCHEMA.split(", ")]
+# Bump when STATE_SCHEMA or the stateful logic changes incompatibly: an older checkpoint is then moved aside.
+STATE_VERSION = "2"
+IN_DEFAULTS = {"num_ebikes_available": None, "is_installed": None, "is_renting": None, "is_returning": None,
+               "num_bikes_available": None, "num_docks_available": None}
+OUT_DEFAULTS = {"ebikes": None, "is_installed": None, "is_renting": None, "is_returning": None,
+                "change_5m": None, "change_15m": None, "change_30m": None, "n_obs": 0}
 
 
 def station_state(key, pdfs, state):
@@ -63,13 +71,10 @@ def station_state(key, pdfs, state):
         state.remove()
         return
     new = pd.concat(list(pdfs), ignore_index=True)
-    if state.exists:
-        hs, eb, inst, rent, ret = state.get
-        t, b, d = json.loads(hs)
-        hist = pd.DataFrame({"last_reported": t, "num_bikes_available": b, "num_docks_available": d})
-    else:
-        hist, eb, inst, rent, ret = pd.DataFrame(columns=["last_reported", "num_bikes_available",
-                                                          "num_docks_available"]), None, None, None, None
+    for col, default in IN_DEFAULTS.items():  # tolerate messages from older producers
+        if col not in new.columns:
+            new[col] = default
+    hist, eb, inst, rent, ret = read_state(state)
     latest_new = new.sort_values("last_reported").iloc[-1]
     if not len(hist) or latest_new["last_reported"] >= hist["last_reported"].max():
         eb, inst, rent, ret = (latest_new["num_ebikes_available"], latest_new["is_installed"],
@@ -99,6 +104,47 @@ def station_state(key, pdfs, state):
     }])
 
 
+def read_state(state):
+    """Station state with defaults: tolerates a missing state, a shorter/older state tuple and a
+    history string that is missing or not valid JSON (it then starts a fresh history)."""
+    empty = pd.DataFrame({"last_reported": pd.Series(dtype="int64"),
+                          "num_bikes_available": pd.Series(dtype="int64"),
+                          "num_docks_available": pd.Series(dtype="int64")})
+    if not state.exists:
+        return empty, None, None, None, None
+    vals = list(state.get) + [None] * len(STATE_FIELDS)
+    rec = dict(zip(STATE_FIELDS, vals))
+    hist = empty
+    try:
+        t, b, d = json.loads(rec["hist"] or "[[],[],[]]")[:3]
+        if len(t) == len(b) == len(d):
+            hist = pd.DataFrame({"last_reported": t, "num_bikes_available": b, "num_docks_available": d})
+    except (TypeError, ValueError):
+        pass
+    return hist, rec["ebikes"], rec["installed"], rec["renting"], rec["returning"]
+
+
+def seed_latest(path: Path) -> pd.DataFrame:
+    """Seed the driver's station table from the last latest_state.parquet on restart.
+    That file holds the processed table (not the stateful step's raw output), so take the columns
+    that exist and fill the rest with defaults; an unreadable file means an empty start."""
+    if not path.exists():
+        return pd.DataFrame()
+    try:
+        df = pd.read_parquet(path)
+    except Exception as e:  # noqa: BLE001 - a corrupt file must not stop the engine
+        print(f"[{datetime.now():%H:%M:%S}] could not read {path.name} ({type(e).__name__}); starting empty",
+              flush=True)
+        return pd.DataFrame()
+    if "station_id" not in df.columns or "last_reported" not in df.columns:
+        return pd.DataFrame()
+    for col, default in OUT_DEFAULTS.items():
+        if col not in df.columns:
+            df[col] = default
+    print(f"[{datetime.now():%H:%M:%S}] seeded {len(df):,} stations from {path.name}", flush=True)
+    return df[OUT_SCHEMA_COLS].set_index("station_id")
+
+
 class AlertEngine:
     """Driver-side part of foreachBatch: latest state, expected demand, Skellam, sinks."""
 
@@ -116,10 +162,7 @@ class AlertEngine:
         rows = exp["gbfs_station_id"].map(self.idx).to_numpy()
         self.E_dep[rows, slot.to_numpy()] = exp["exp_departures"].to_numpy()
         self.E_arr[rows, slot.to_numpy()] = exp["exp_arrivals"].to_numpy()
-        self.latest = pd.DataFrame()
-        prev = out_dir / "latest_state.parquet"
-        if prev.exists():  # restart: seed with the last written state (refreshed as stations report)
-            self.latest = pd.read_parquet(prev)[OUT_SCHEMA_COLS].set_index("station_id")
+        self.latest = seed_latest(out_dir / "latest_state.parquet")
         self.producer = None
         if alert_topic:
             from confluent_kafka import Producer
@@ -248,7 +291,20 @@ class AlertEngine:
               f"alert step {dur:.1f}s", flush=True)
 
 
-OUT_SCHEMA_COLS = [c.split()[0] for c in OUT_SCHEMA.split(", ")]
+
+def checkpoint_guard(ck: Path) -> None:
+    """Move a checkpoint written by an incompatible state version aside (never delete it).
+    A checkpoint without a version file is assumed compatible and gets stamped; if Spark still
+    rejects it, scripts/start_stream.sh moves it aside and retries once."""
+    marker = ck / "bikeflow_state_version"
+    found = marker.read_text().strip() if marker.exists() else None
+    if ck.exists() and found is not None and found != STATE_VERSION:
+        aside = ck.with_name(f"{ck.name}.incompatible-{datetime.now():%Y%m%d-%H%M%S}")
+        ck.rename(aside)
+        print(f"[{datetime.now():%H:%M:%S}] checkpoint state version {found!r} != {STATE_VERSION!r}: "
+              f"moved to {aside.name}, starting fresh", flush=True)
+    ck.mkdir(parents=True, exist_ok=True)
+    (ck / "bikeflow_state_version").write_text(STATE_VERSION + "\n")
 
 
 def main() -> None:
@@ -271,56 +327,59 @@ def main() -> None:
     a = ap.parse_args()
 
     check_disk("stream_alerts")
+    checkpoint_guard(a.checkpoint.resolve())
     out_dir = a.out_dir.resolve()
     engine = AlertEngine(out_dir, a.bootstrap, a.alert_topic or None, state_history=a.state_history)
     spark = get_spark("bikeflow-stream-alerts", driver_memory="2g", cores=2, shuffle_partitions=16,
                       packages=KAFKA_PKG)
-    print(f"[{datetime.now():%H:%M:%S}] alert engine START: topic {a.topic} ({a.starting_offsets}), "
-          f"trigger {a.trigger_seconds}s, out {out_dir}, checkpoint {a.checkpoint}", flush=True)
-    reader = (spark.readStream.format("kafka").option("kafka.bootstrap.servers", a.bootstrap)
-              .option("subscribe", a.topic).option("startingOffsets", a.starting_offsets)
-              .option("failOnDataLoss", "false"))
-    if a.max_offsets:
-        reader = reader.option("maxOffsetsPerTrigger", a.max_offsets)
-    rows = (reader.load()
-            .select(F.from_json(F.col("value").cast("string"), IN_SCHEMA).alias("j")).select("j.*")
-            .filter(F.col("station_id").isNotNull() & F.col("last_reported").isNotNull())
-            .withColumn("event_time", F.timestamp_seconds("last_reported"))
-            .withWatermark("event_time", "5 minutes"))
-    per_station = rows.groupBy("station_id").applyInPandasWithState(
-        station_state, OUT_SCHEMA, STATE_SCHEMA, "update", GroupStateTimeout.EventTimeTimeout)
-    writer = (per_station.writeStream.outputMode("update").foreachBatch(engine.process)
-              .option("checkpointLocation", str(a.checkpoint.resolve())))
-    writer = writer.trigger(availableNow=True) if a.available_now else \
-        writer.trigger(processingTime=f"{a.trigger_seconds} seconds")
-    t0 = time.time()
-    with ResourceMonitor(spark, interval=1.0, include_children=True) as mon:
-        q = writer.start()
-        try:
-            if a.stop_when_idle:
-                while not q.awaitTermination(5):
-                    idle = time.time() - engine.last_update_wall if engine.seen_updates else 0
-                    if idle >= a.stop_when_idle:
-                        print(f"[{datetime.now():%H:%M:%S}] no new data for {idle:.0f}s: stopping", flush=True)
-                        q.stop()
-                        break
-            else:
-                q.awaitTermination()
-        except KeyboardInterrupt:
-            q.stop()
-    prog = [p for p in (q.recentProgress or [])]
-    durs = [p["durationMs"].get("triggerExecution", 0) / 1000 for p in prog
-            if p.get("durationMs") and p.get("numInputRows", 0) > 0]  # batches that had data
-    summary = {"batches": len(engine.durations), "wall_s": round(time.time() - t0, 1),
-               "micro_batch_s": {"mean": round(float(np.mean(durs)), 2) if durs else None,
-                                 "max": round(float(np.max(durs)), 2) if durs else None},
-               "alert_step_s": {"mean": round(float(np.mean(engine.durations)), 2) if engine.durations else None,
-                                "max": round(float(np.max(engine.durations)), 2) if engine.durations else None},
-               "peak_rss_gb_spark_and_python_workers": round(mon.peak_rss_gb, 2),
-               "peak_swap_gb": round(mon.peak_swap_gb, 2)}
-    (out_dir / "run_summary.json").write_text(json.dumps(summary, indent=2))
-    print(f"[{datetime.now():%H:%M:%S}] alert engine END: {json.dumps(summary)}", flush=True)
-    stop_spark(spark)
+    try:  # always clean up this session's scratch dir, even if the query fails to start
+        print(f"[{datetime.now():%H:%M:%S}] alert engine START: topic {a.topic} ({a.starting_offsets}), "
+              f"trigger {a.trigger_seconds}s, out {out_dir}, checkpoint {a.checkpoint}", flush=True)
+        reader = (spark.readStream.format("kafka").option("kafka.bootstrap.servers", a.bootstrap)
+                  .option("subscribe", a.topic).option("startingOffsets", a.starting_offsets)
+                  .option("failOnDataLoss", "false"))
+        if a.max_offsets:
+            reader = reader.option("maxOffsetsPerTrigger", a.max_offsets)
+        rows = (reader.load()
+                .select(F.from_json(F.col("value").cast("string"), IN_SCHEMA).alias("j")).select("j.*")
+                .filter(F.col("station_id").isNotNull() & F.col("last_reported").isNotNull())
+                .withColumn("event_time", F.timestamp_seconds("last_reported"))
+                .withWatermark("event_time", "5 minutes"))
+        per_station = rows.groupBy("station_id").applyInPandasWithState(
+            station_state, OUT_SCHEMA, STATE_SCHEMA, "update", GroupStateTimeout.EventTimeTimeout)
+        writer = (per_station.writeStream.outputMode("update").foreachBatch(engine.process)
+                  .option("checkpointLocation", str(a.checkpoint.resolve())))
+        writer = writer.trigger(availableNow=True) if a.available_now else \
+            writer.trigger(processingTime=f"{a.trigger_seconds} seconds")
+        t0 = time.time()
+        with ResourceMonitor(spark, interval=1.0, include_children=True) as mon:
+            q = writer.start()
+            try:
+                if a.stop_when_idle:
+                    while not q.awaitTermination(5):
+                        idle = time.time() - engine.last_update_wall if engine.seen_updates else 0
+                        if idle >= a.stop_when_idle:
+                            print(f"[{datetime.now():%H:%M:%S}] no new data for {idle:.0f}s: stopping", flush=True)
+                            q.stop()
+                            break
+                else:
+                    q.awaitTermination()
+            except KeyboardInterrupt:
+                q.stop()
+        prog = [p for p in (q.recentProgress or [])]
+        durs = [p["durationMs"].get("triggerExecution", 0) / 1000 for p in prog
+                if p.get("durationMs") and p.get("numInputRows", 0) > 0]  # batches that had data
+        summary = {"batches": len(engine.durations), "wall_s": round(time.time() - t0, 1),
+                   "micro_batch_s": {"mean": round(float(np.mean(durs)), 2) if durs else None,
+                                     "max": round(float(np.max(durs)), 2) if durs else None},
+                   "alert_step_s": {"mean": round(float(np.mean(engine.durations)), 2) if engine.durations else None,
+                                    "max": round(float(np.max(engine.durations)), 2) if engine.durations else None},
+                   "peak_rss_gb_spark_and_python_workers": round(mon.peak_rss_gb, 2),
+                   "peak_swap_gb": round(mon.peak_swap_gb, 2)}
+        (out_dir / "run_summary.json").write_text(json.dumps(summary, indent=2))
+        print(f"[{datetime.now():%H:%M:%S}] alert engine END: {json.dumps(summary)}", flush=True)
+    finally:
+        stop_spark(spark)
 
 
 if __name__ == "__main__":
