@@ -13,6 +13,8 @@
 
 ![BikeFlow replaying a recorded evening rush (live mode looks the same)](docs/screenshots/02_replay_mode.png)
 
+*BikeFlow replaying a recorded evening rush (live mode looks the same)*
+
 ---
 
 ## Contents
