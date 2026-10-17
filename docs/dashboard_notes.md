@@ -27,7 +27,7 @@ scripts/make_replay.sh         # (re)build the replay/demo data, see below
 |---|---|
 | **Live map** | All ~2,500 stations on one Leaflet canvas, coloured by status (red empty now, blue full now, orange risk of empty, purple risk of full, grey-green ok); size grows with probability; pulsing rings only on HIGH alerts. Floating panels: filters + search (left), ranked forward-looking alerts (right, click = fly to station), city pulse (bottom left), alert ticker (bottom), replay controls (bottom centre, Replay mode). Click a station for the drawer: bikes/docks gauge, 3-hour sparkline from the recorded status, expected departures/arrivals for the next 30 min, P(empty)/P(full) with a plain sentence, weather factor, suggested move. |
 | **Alerts** | Ranked table of forward-looking alerts (virtualized) with probability bars, and greedy rebalancing suggestions ("Move N bikes from A to B, X m away"). |
-| **Prediction vs reality** | Alert episodes older than 30 minutes with hit/miss from the recorded status, running precision for HIGH and MEDIUM, and precision against the number of alerts. Caveat: operator vans change outcomes. |
+| **Prediction vs reality** | (1) **Replay scoring**, "one recorded 3-hour evening rush window": precision and recall of BikeFlow's forward-looking alerts vs the simple rule "≤ 2 bikes (or docks)", from `outputs/metrics/replay_alert_scores.json` (exact window, `src/score_alerts.py --since`). (2) **Live scoring**: the live engine's alerts since its last restart, scored by `src/score_alerts.py --since-restart` in a separate low-priority process (at most every 10 min; reads `data/live`, writes `data/dashboard/live_alert_scores.json`); shows "not enough data yet" below 50 resolved alerts. (3) Alert episodes with hit/miss, running precision for HIGH and MEDIUM, precision vs number of alerts. Caveat: operator vans change outcomes. |
 | **Insights** (lazy-loaded) | Daily rides with storm/disruption days marked, monthly rides, weekday vs weekend hourly profile, departures heatmap by hour × weekday, busiest stations, and the Stage 2 / 2b model comparison tables with an honest summary. |
 | **How it works** | Animated architecture diagram (collector → Kafka → Spark Structured Streaming → alerts → API → dashboard, with the batch history and weather feeding Spark) and the alert formula in plain words. |
 
@@ -50,6 +50,7 @@ take `?at=<ISO time>`, which drives the time slider.
 | `GET /api/ticker` | Newest alert episodes (last 3 h) for the ticker. |
 | `GET /api/pulse` | Estimated bikes out on the street per 15 min and per hour: peak docked total in the recording minus docked now, so depots and vans are not counted. |
 | `GET /api/timeline` | Replay batch times and window (for the slider). |
+| `GET /api/scores` | `?source=replay`: the replay window's precision/recall vs the simple rule. `?source=live`: the same for live alerts since the last restart (background scoring, never blocks; `enough=false` below 50 resolved alerts). |
 | `GET /api/insights` | Stage 1/2/2b results from `outputs/metrics/` (+ daily rides, and a weekday × hour heatmap derived from `expected_demand.parquet`). |
 | `GET /api/health` | Last live and replay batch (time, duration, rows), collector last poll and Kafka counters, process status, stale flag. |
 

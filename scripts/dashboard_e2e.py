@@ -5,10 +5,12 @@ measures map smoothness (frames per second while panning and zooming with every 
 drawn) and the memory of the dashboard next to the running pipeline.
 
 Needs the dashboard running (scripts/start_dashboard.sh).
-    .venv/bin/python scripts/dashboard_e2e.py
+    .venv/bin/python scripts/dashboard_e2e.py                 # everything
+    .venv/bin/python scripts/dashboard_e2e.py --only reality  # just the Prediction vs reality screenshots
 """
 import json
 import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -50,7 +52,34 @@ def rss_report() -> dict:
     return res
 
 
+def reality_only() -> None:
+    """Screenshots of the Prediction vs reality page (scoring sections + episodes), replay mode."""
+    SHOTS.mkdir(parents=True, exist_ok=True)
+    errors = []
+    with sync_playwright() as p:
+        b = p.chromium.launch()
+        page = b.new_page(viewport={"width": 1920, "height": 1080})
+        page.on("console", lambda m: m.type == "error" and errors.append(m.text))
+        page.on("pageerror", lambda e: errors.append(str(e)))
+        page.goto(URL + "/reality")
+        page.click("text=Replay")
+        page.wait_for_selector("table.t", timeout=30000)
+        page.wait_for_selector(".recharts-line", timeout=30000)
+        page.wait_for_timeout(1500)
+        page.screenshot(path=str(SHOTS / "05_prediction_vs_reality.png"))
+        y = page.evaluate("() => document.querySelector('h2').getBoundingClientRect().top - 80")
+        page.evaluate(f"() => {{ document.querySelector('.page').scrollTo(0, {y}); }}")
+        page.wait_for_timeout(800)
+        page.screenshot(path=str(SHOTS / "05b_prediction_vs_reality_episodes.png"))
+        b.close()
+    print(json.dumps({"screenshots": ["docs/screenshots/05_prediction_vs_reality.png",
+                                      "docs/screenshots/05b_prediction_vs_reality_episodes.png"],
+                      "console_errors": errors}, indent=2))
+
+
 def main() -> None:
+    if sys.argv[1:3] == ["--only", "reality"]:
+        return reality_only()
     SHOTS.mkdir(parents=True, exist_ok=True)
     errors, report = [], {"screenshots": [], "pages": {}}
     with sync_playwright() as p:

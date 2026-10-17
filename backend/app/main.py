@@ -6,6 +6,9 @@ Every endpoint that shows live data takes ?source=live (default) or ?source=repl
 (scripts/make_replay.sh output); replay endpoints also take ?at=<ISO time> for the time slider.
 """
 import json
+import subprocess
+import sys
+import time
 from typing import Literal
 
 import pandas as pd
@@ -22,6 +25,27 @@ app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http
 
 Source = Literal["live", "replay"]
 STALE_AFTER_S = 5 * 60
+LIVE_SCORES = store.ROOT / "data" / "dashboard" / "live_alert_scores.json"
+LIVE_SCORING_PID = store.ROOT / "data" / "dashboard" / "live_scoring.pid"
+LIVE_SCORING_EVERY_S = 10 * 60
+MIN_RESOLVED = 50
+
+
+def _live_scoring_running() -> bool:
+    return store.pid_alive(LIVE_SCORING_PID)
+
+
+def _start_live_scoring() -> None:
+    """Score the live alerts in a separate, low-priority process (never in the API process, never
+    blocking a request). It only reads data/live and writes data/dashboard/live_alert_scores.json."""
+    if _live_scoring_running():
+        return
+    LIVE_SCORES.parent.mkdir(parents=True, exist_ok=True)
+    cmd = ["nice", "-n", "15", sys.executable, "-m", "src.score_alerts", "--since-restart",
+           "--alerts-out", str(store.LIVE), "--status-dir", str(store.LIVE / "status"), "--output", str(LIVE_SCORES)]
+    proc = subprocess.Popen(cmd, cwd=store.ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                            start_new_session=True)
+    LIVE_SCORING_PID.write_text(str(proc.pid))
 
 
 def _state(source: str, at: str | None):
@@ -57,6 +81,46 @@ def get_resolved(source: Source = "live", limit: int = Query(300, le=2000)):
     return {"source": source, **logic.resolve(source, limit),
             "caveat": "Operator vans move bikes between stations; a restock or clear-out can change the outcome "
                       "of an alert regardless of rider demand."}
+
+
+def _score_summary(s: dict) -> dict:
+    """Model vs simple-rule baseline, precision and recall, from a src/score_alerts.py result."""
+    if not s or not s.get("evaluation_times") or "model" not in s:
+        return {"enough": False, "resolved_risk_alerts": (s or {}).get("resolved_risk_alerts") or 0}
+    out = {"resolved_risk_alerts": s["resolved_risk_alerts"], "evaluation_times": s["evaluation_times"],
+           "station_times": s["station_times_in_service"], "base_rate": s["base_rate"]}
+    for k in ("empty", "full"):
+        m, b, r = s["model"][k], s["baseline_persistence"][k], s["recall"][k]
+        risk = [m["risk_alerts"][lv] for lv in ("HIGH", "MEDIUM")]
+        n, h = sum(x["alerts"] for x in risk), sum(x["hits"] for x in risk)
+        out[k] = {
+            "model_high": m["risk_alerts"]["HIGH"], "model_medium": m["risk_alerts"]["MEDIUM"],
+            "model_risk_all": {"alerts": n, "hits": h, "precision": round(h / n, 4) if n else None},
+            "baseline_all": b["all"], "baseline_exactly_2": b["exactly 2"],
+            "events": r["events"], "model_recall": r["model_recall"], "baseline_recall": r["baseline_recall"],
+        }
+    out["enough"] = out["resolved_risk_alerts"] >= MIN_RESOLVED
+    return out
+
+
+@app.get("/api/scores")
+def get_scores(source: Source = "replay"):
+    """Precision and recall of the alerts vs the "<= 2 bikes (or docks)" rule, src/score_alerts.py logic."""
+    if source == "replay":
+        p = store.METRICS / "replay_alert_scores.json"
+        s = json.loads(p.read_text()) if p.exists() else {}
+        meta = store.replay_meta()
+        return {"source": "replay", "label": "one recorded 3-hour evening rush window",
+                "window": {"start": meta.get("window_start"), "end": meta.get("window_end")},
+                "since": s.get("since"), "data_end": s.get("data_end"), **_score_summary(s)}
+    s = json.loads(LIVE_SCORES.read_text()) if LIVE_SCORES.exists() else {}
+    age = time.time() - store.mtime(LIVE_SCORES) if LIVE_SCORES.exists() else None
+    if age is None or age > LIVE_SCORING_EVERY_S:
+        _start_live_scoring()
+    return {"source": "live", "label": "alerts from the live engine since its last restart",
+            "since": s.get("since"), "data_end": s.get("data_end"), "computed_at": s.get("computed_at"),
+            "computing": _live_scoring_running(), "min_resolved": MIN_RESOLVED,
+            "note": s.get("note"), **_score_summary(s)}
 
 
 @app.get("/api/rebalance")

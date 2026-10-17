@@ -14,6 +14,11 @@ docks), caught by an alert of that type for that station in the 30 minutes befor
 Baseline (persistence rule): alert "empty" if bikes <= 2 now, "full" if docks <= 2 now,
 scored the same way at the same evaluation times.
 
+--since ISO restricts scoring to alert batches whose data time is at/after that moment (e.g. the
+replay window start); --since-restart uses the live engine's latest restart (the newest batch 0 in
+alert_batches.jsonl). Both also limit how much status data is loaded. Read-only: the inputs are
+never modified, so this can run next to a live engine.
+
     python -m src.score_alerts --alerts-out data/live --status-dir data/live/status
 """
 import argparse
@@ -29,15 +34,31 @@ from src.common import METRICS_DIR, ROOT, write_json
 from src.replay import STALE_S, epoch_s
 
 
-def first_poll_epoch(status_dir: Path) -> int:
-    f = ds.dataset(str(status_dir), format="parquet", partitioning="hive").to_table(columns=["fetched_at"]).to_pandas()
-    return int(epoch_s(f["fetched_at"]).min())
+def _dataset(status_dir: Path):
+    # exclude files being written (hidden temp names) and anything unreadable
+    return ds.dataset(str(status_dir), format="parquet", partitioning="hive", exclude_invalid_files=True)
 
 
-def load_status(status_dir: Path) -> pd.DataFrame:
-    t = ds.dataset(str(status_dir), format="parquet", partitioning="hive").to_table(columns=[
+def _date_filter(lo: int | None):
+    if lo is None:
+        return None
+    first_day = pd.Timestamp(lo, unit="s", tz="UTC").strftime("%Y-%m-%d")
+    return ds.field("date") >= first_day
+
+
+def first_poll_epoch(status_dir: Path, lo: int | None = None) -> int:
+    f = _dataset(status_dir).to_table(columns=["fetched_at"], filter=_date_filter(lo)).to_pandas()
+    e = epoch_s(f["fetched_at"])
+    return int(e[e >= lo].min() if lo is not None and (e >= lo).any() else e.min())
+
+
+def load_status(status_dir: Path, lo: int | None = None) -> pd.DataFrame:
+    """Recorded status; with lo, only reports from lo - 1 h onwards (and their date partitions)."""
+    t = _dataset(status_dir).to_table(columns=[
         "fetched_at", "station_id", "num_bikes_available", "num_docks_available", "is_installed",
-        "is_renting", "is_returning", "last_reported"]).to_pandas()
+        "is_renting", "is_returning", "last_reported"], filter=_date_filter(lo - 3600 if lo else None)).to_pandas()
+    if lo is not None:
+        t = t[t["last_reported"] >= lo - 3600]
     t = t[t["last_reported"] >= epoch_s(t["fetched_at"]) - STALE_S]
     t = t.drop_duplicates(["station_id", "last_reported"]).sort_values(["station_id", "last_reported"])
     t["in_service"] = t["is_installed"] & t["is_renting"] & t["is_returning"]
@@ -85,21 +106,34 @@ def main() -> None:
     ap.add_argument("--status-dir", type=Path, default=ROOT / "data" / "live" / "status")
     ap.add_argument("--horizon-min", type=int, default=30)
     ap.add_argument("--output", type=Path, default=METRICS_DIR / "alert_scores.json")
+    g = ap.add_mutually_exclusive_group()
+    g.add_argument("--since", help="only score alert batches with data time >= this ISO time")
+    g.add_argument("--since-restart", action="store_true", help="only alerts since the engine's latest restart")
     a = ap.parse_args()
     H = a.horizon_min * 60
 
-    status = load_status(a.status_dir)
-    data_end = int(status["last_reported"].max())
     batches = [json.loads(line) for line in open(a.alerts_out / "alert_batches.jsonl")]
+    since = None
+    if a.since:
+        since = int(epoch_s(pd.Series([a.since]))[0])
+    elif a.since_restart:
+        restarts = [b for b in batches if b["batch_id"] == 0]
+        since = int(epoch_s(pd.Series([restarts[-1]["processed_at"]]))[0]) if restarts else None
+    status = load_status(a.status_dir, since)
+    data_end = int(status["last_reported"].max())
     times = np.array(sorted({int(epoch_s(pd.Series([b["as_of"]]))[0]) for b in batches}), dtype=np.int64)
     # Score only times after the first poll (earlier "now"s come from old reports sent first)
     # and at least one horizon before the end of the recording.
-    start = first_poll_epoch(a.status_dir)
+    start = first_poll_epoch(a.status_dir, since)
+    if since is not None:
+        start = max(start, since)
     scored = times[(times >= start) & (times <= data_end - H)]
-    res = {"status_dir": str(a.status_dir), "data_start": None, "data_end": None,
+    res = {"status_dir": str(a.status_dir), "data_start": None, "data_end": None, "since": None,
            "evaluation_times": int(len(scored)), "horizon_min": a.horizon_min}
     iso = lambda x: datetime.fromtimestamp(int(x), timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")  # noqa: E731
     res["data_start"], res["data_end"] = iso(start), iso(data_end)
+    res["since"] = iso(since) if since is not None else None
+    res["computed_at"] = iso(pd.Timestamp.now(tz="UTC").timestamp())
     if not len(scored):
         res["note"] = f"no alert batch is {a.horizon_min} min older than the end of the recorded data"
         write_json(a.output, res)
@@ -150,6 +184,8 @@ def main() -> None:
                      "model_caught": caught(mk), "model_recall": round(caught(mk) / n, 4) if n else None,
                      "baseline_caught": caught(bk), "baseline_recall": round(caught(bk) / n, 4) if n else None}
     res.update(model=model, baseline_persistence=base, recall=rec)
+    res["resolved_risk_alerts"] = int(sum(model[k]["risk_alerts"][lvl]["alerts"] for k in ("empty", "full")
+                                         for lvl in ("HIGH", "MEDIUM")))
     write_json(a.output, res)
     print(json.dumps(res, indent=2))
 

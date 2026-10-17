@@ -1,0 +1,139 @@
+{
+  "status_dir": "data/replay_out/source/status",
+  "data_start": "2026-10-16T20:00:11Z",
+  "data_end": "2026-10-17T04:30:49Z",
+  "since": "2026-10-16T20:00:00Z",
+  "evaluation_times": 99,
+  "horizon_min": 30,
+  "computed_at": "2026-10-17T04:56:47Z",
+  "station_times_in_service": 243177,
+  "base_rate": {
+    "empty": 0.1298,
+    "full": 0.1874
+  },
+  "model": {
+    "empty": {
+      "all_levels": {
+        "alerts": 23836,
+        "hits": 22803,
+        "precision": 0.9567
+      },
+      "HIGH": {
+        "alerts": 22106,
+        "hits": 21586,
+        "precision": 0.9765
+      },
+      "MEDIUM": {
+        "alerts": 1730,
+        "hits": 1217,
+        "precision": 0.7035
+      },
+      "risk_alerts": {
+        "HIGH": {
+          "alerts": 843,
+          "hits": 719,
+          "precision": 0.8529
+        },
+        "MEDIUM": {
+          "alerts": 1730,
+          "hits": 1217,
+          "precision": 0.7035
+        }
+      },
+      "already_at_threshold": {
+        "alerts": 21263,
+        "hits": 20867,
+        "precision": 0.9814
+      }
+    },
+    "full": {
+      "all_levels": {
+        "alerts": 35365,
+        "hits": 34241,
+        "precision": 0.9682
+      },
+      "HIGH": {
+        "alerts": 33140,
+        "hits": 32605,
+        "precision": 0.9839
+      },
+      "MEDIUM": {
+        "alerts": 2225,
+        "hits": 1636,
+        "precision": 0.7353
+      },
+      "risk_alerts": {
+        "HIGH": {
+          "alerts": 360,
+          "hits": 247,
+          "precision": 0.6861
+        },
+        "MEDIUM": {
+          "alerts": 2225,
+          "hits": 1636,
+          "precision": 0.7353
+        }
+      },
+      "already_at_threshold": {
+        "alerts": 32780,
+        "hits": 32358,
+        "precision": 0.9871
+      }
+    }
+  },
+  "baseline_persistence": {
+    "empty": {
+      "rule": "bikes <= 2 now",
+      "all": {
+        "alerts": 33189,
+        "hits": 26105,
+        "precision": 0.7866
+      },
+      "already_at_threshold (<= 1)": {
+        "alerts": 21513,
+        "hits": 21125,
+        "precision": 0.982
+      },
+      "exactly 2": {
+        "alerts": 11676,
+        "hits": 4980,
+        "precision": 0.4265
+      }
+    },
+    "full": {
+      "rule": "docks <= 2 now",
+      "all": {
+        "alerts": 44964,
+        "hits": 38232,
+        "precision": 0.8503
+      },
+      "already_at_threshold (<= 1)": {
+        "alerts": 33176,
+        "hits": 32754,
+        "precision": 0.9873
+      },
+      "exactly 2": {
+        "alerts": 11788,
+        "hits": 5478,
+        "precision": 0.4647
+      }
+    }
+  },
+  "recall": {
+    "empty": {
+      "events": 1316,
+      "model_caught": 969,
+      "model_recall": 0.7363,
+      "baseline_caught": 1237,
+      "baseline_recall": 0.94
+    },
+    "full": {
+      "events": 1651,
+      "model_caught": 1190,
+      "model_recall": 0.7208,
+      "baseline_caught": 1477,
+      "baseline_recall": 0.8946
+    }
+  },
+  "resolved_risk_alerts": 5158
+}
