@@ -11,7 +11,7 @@
 ![Leaflet](https://img.shields.io/badge/Leaflet-1.9-199900?logo=leaflet&logoColor=white)
 ![Java](https://img.shields.io/badge/Java-17-007396?logo=openjdk&logoColor=white)
 
-![BikeFlow live map during the evening rush](docs/screenshots/02_replay_mode.png)
+![BikeFlow replaying a recorded evening rush (live mode looks the same)](docs/screenshots/02_replay_mode.png)
 
 ---
 
@@ -225,6 +225,8 @@ Alert counts are station-minutes. Events: 1,316 stations dropping to ≤ 1 bike,
 - **The simple rule catches more events, but its real predictions are wrong more often than right.** It only looks accurate overall because most of its alerts are stations that are already empty or full.
 - **Counted as episodes** (one station staying on alert counts once), the same window has 1,053 alert episodes, 76 % of which came true (HIGH 79 %, MEDIUM 76 %).
 - **This is one rush hour**, not a full evaluation.
+
+Recall depends on the window: an earlier one-hour afternoon test caught about half of the events, so treat the rush-hour recall as a best case until the live run reports across more hours.
 
 ### 6.4 Live results
 **To be updated after the live run.** The live engine scores its own alerts against the collected live status (alerts older than 30 minutes only, from the last restart); the dashboard's *Prediction vs reality* page shows these numbers once at least 50 alerts have been resolved.
