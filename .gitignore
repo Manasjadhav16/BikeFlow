@@ -12,3 +12,6 @@ outputs/metrics/*.jsonl
 # dashboard
 frontend/node_modules/
 frontend/dist/
+
+# private notes (never committed)
+private/
