@@ -52,8 +52,13 @@ function ScoreTable({ d }) {
 
 function tradeOff(d) {
   const E = d.empty, F = d.full;
-  return `BikeFlow's probability alerts are more precise and fire much less often: ${p0(E.model_risk_all.precision)} (empty) and ${p0(F.model_risk_all.precision)} (full) of its forward-looking alerts came true, ` +
-    `against ${p0(E.baseline_exactly_2.precision)} and ${p0(F.baseline_exactly_2.precision)} when the simple rule fires on a station that still has 2 bikes or docks — so its real predictions are wrong more often than right. ` +
+  // Only claim "wrong more often than right" when the simple rule's real predictions really are below 50%.
+  const ruleMostlyWrong = E.baseline_exactly_2.precision < 0.5 && F.baseline_exactly_2.precision < 0.5;
+  const ours = `${p0(E.model_risk_all.precision)} and ${p0(F.model_risk_all.precision)}`;
+  return "BikeFlow's probability alerts are more precise and fire much less often. " +
+    `When the simple rule makes a real prediction (a station that still has 2 bikes or docks), it is right only ${p0(E.baseline_exactly_2.precision)} (empty) and ${p0(F.baseline_exactly_2.precision)} (full) of the time` +
+    (ruleMostlyWrong ? `, so it is wrong more often than right, while BikeFlow's forward-looking alerts came true ${ours} of the time. `
+                     : `, against ${ours} for BikeFlow's forward-looking alerts. `) +
     `The simple rule catches more events (${p0(E.baseline_recall)} and ${p0(F.baseline_recall)} recall, against ${p0(E.model_recall)} and ${p0(F.model_recall)}) because it fires on every nearly-empty station, ` +
     `and it only looks accurate overall (${p0(E.baseline_all.precision)}) because most of its alerts are stations that are already empty or full.`;
 }
@@ -75,7 +80,7 @@ function ScoringSections() {
           Only alerts older than 30 minutes count. Scoring runs in a separate low-priority process at most every 10 minutes and only reads the live data.</p>
         {live?.enough ? <><ScoreTable d={live} /><p className="muted" style={{ marginBottom: 0 }}>{tradeOff(live)}</p></>
           : <div className="empty-state" style={{ textAlign: "left", padding: "8px 0" }}>
-              <b>Not enough data yet</b> — {n0(live?.resolved_risk_alerts ?? 0)} resolved forward-looking alerts so far; {live?.min_resolved ?? 50} are needed.
+              <b>Not enough data yet:</b> {n0(live?.resolved_risk_alerts ?? 0)} resolved forward-looking alerts so far; {live?.min_resolved ?? 50} are needed.
               {live?.computing ? " Scoring is running now." : ""} {live?.data_end ? `Live status collected up to ${nyTime(live.data_end)} New York.` : ""}
             </div>}
       </div>
@@ -112,7 +117,7 @@ export default function Reality() {
           <h3>Running precision vs number of alerts</h3>
           <p className="sub">Share of resolved alert episodes that came true, as more alerts accumulate.</p>
           <div style={{ height: 280 }}>
-            {curve.length < 2 ? <div className="empty-state">Not enough resolved alerts yet{source === "live" ? " — try Replay" : ""}.</div> : (
+            {curve.length < 2 ? <div className="empty-state">Not enough resolved alerts yet{source === "live" ? ". Try Replay" : ""}.</div> : (
               <ResponsiveContainer>
                 <LineChart data={curve} margin={{ top: 8, right: 16, bottom: 8, left: 0 }}>
                   <CartesianGrid stroke="rgba(148,163,184,0.12)" vertical={false} />
