@@ -58,7 +58,7 @@ export default function Insights() {
     <div className="page"><div className="page-inner">
       <div>
         <h1>Insights</h1>
-        <p className="lede">{d.summary_numbers.total_departures.toLocaleString()} rides across {d.summary_numbers.stations.toLocaleString()} stations and {d.summary_numbers.days} days (Oct 2025 – Sep 2026).</p>
+        <p className="lede">{d.summary_numbers.total_departures.toLocaleString("en-US")} rides across {d.summary_numbers.stations.toLocaleString("en-US")} stations and {d.summary_numbers.days} days (Oct 2025 – Sep 2026).</p>
       </div>
 
       <div className="card">
@@ -70,7 +70,7 @@ export default function Insights() {
               {GRID}
               <XAxis dataKey="date" {...AX} tickFormatter={(v) => new Date(v).toLocaleString("en-US", { month: "short" })} interval={30} />
               <YAxis {...AX} tickFormatter={k} />
-              <Tooltip {...TT} formatter={(v) => v?.toLocaleString()} />
+              <Tooltip {...TT} formatter={(v) => v?.toLocaleString("en-US")} />
               <Line dataKey="rides" stroke="#22d3ee" dot={false} strokeWidth={1.5} isAnimationActive={false} name="Rides" />
               <Line dataKey="storm" stroke="none" dot={<StormDot />} activeDot={false} isAnimationActive={false} name="Disrupted day" />
             </ComposedChart>
@@ -86,7 +86,7 @@ export default function Insights() {
             <ResponsiveContainer>
               <BarChart data={monthly} margin={{ top: 16, right: 8, bottom: 0, left: 0 }}>
                 {GRID}<XAxis dataKey="label" {...AX} /><YAxis {...AX} tickFormatter={k} />
-                <Tooltip {...TT} formatter={(v) => v.toLocaleString()} />
+                <Tooltip {...TT} formatter={(v) => v.toLocaleString("en-US")} />
                 <Bar dataKey="rides" fill="#38bdf8" radius={[4, 4, 0, 0]} isAnimationActive={false}><LabelList dataKey="rides" position="top" formatter={k} fill="#a9b4c6" fontSize={11} /></Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -99,7 +99,7 @@ export default function Insights() {
             <ResponsiveContainer>
               <LineChart data={d.hourly_profile} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
                 {GRID}<XAxis dataKey="hour" {...AX} /><YAxis {...AX} tickFormatter={k} />
-                <Tooltip {...TT} formatter={(v) => Math.round(v).toLocaleString()} labelFormatter={(h) => `${h}:00`} />
+                <Tooltip {...TT} formatter={(v) => Math.round(v).toLocaleString("en-US")} labelFormatter={(h) => `${h}:00`} />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Line dataKey="weekday" name="Weekday" stroke="#22d3ee" strokeWidth={2} dot={false} isAnimationActive={false} />
                 <Line dataKey="weekend" name="Weekend" stroke="#f59e0b" strokeWidth={2} dot={false} isAnimationActive={false} />
@@ -121,7 +121,7 @@ export default function Insights() {
                 {Array.from({ length: 24 }, (_, h) => {
                   const v = heat[`${i + 1}-${h}`] ?? 0;
                   const a = Math.pow(v / heatMax, 0.8);
-                  return <span key={`${dn}-${h}`} className="c" title={`${dn} ${h}:00 · ${Math.round(v).toLocaleString()} departures`} style={{ background: `rgba(34, 211, 238, ${0.06 + a * 0.9})` }} />;
+                  return <span key={`${dn}-${h}`} className="c" title={`${dn} ${h}:00 · ${Math.round(v).toLocaleString("en-US")} departures`} style={{ background: `rgba(34, 211, 238, ${0.06 + a * 0.9})` }} />;
                 })}
               </Fragment>
             ))}
@@ -134,7 +134,7 @@ export default function Insights() {
             <ResponsiveContainer>
               <BarChart data={d.busiest_stations.slice(0, 10)} layout="vertical" margin={{ top: 0, right: 48, bottom: 0, left: 8 }}>
                 <XAxis type="number" hide /><YAxis type="category" dataKey="name" width={190} {...AX} />
-                <Tooltip {...TT} formatter={(v) => v.toLocaleString()} />
+                <Tooltip {...TT} formatter={(v) => v.toLocaleString("en-US")} />
                 <Bar dataKey="trips" fill="#38bdf8" radius={[0, 4, 4, 0]} isAnimationActive={false}><LabelList dataKey="trips" position="right" formatter={k} fill="#a9b4c6" fontSize={11} /></Bar>
               </BarChart>
             </ResponsiveContainer>

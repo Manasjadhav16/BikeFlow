@@ -123,6 +123,25 @@ def get_scores(source: Source = "replay"):
             "note": s.get("note"), **_score_summary(s)}
 
 
+@app.get("/api/models")
+def get_models():
+    """PRELIMINARY nowcast model comparison, read fresh from outputs/metrics/nowcast_metrics.json on every
+    request (no cache), so rerunning `python -m src.nowcast` updates the dashboard."""
+    p = store.METRICS / "nowcast_metrics.json"
+    if not p.exists():
+        return {"available": False,
+                "message": "Model comparison not available yet: run `python -m src.nowcast` to create "
+                           "outputs/metrics/nowcast_metrics.json."}
+    try:
+        d = json.loads(p.read_text())
+    except ValueError:
+        return {"available": False, "message": "nowcast_metrics.json is being written or is not valid JSON; try again."}
+    for r in d.get("results", {}).values():  # PR curves are only needed for the static chart
+        for m in r.get("models", {}).values():
+            m.pop("pr_curve", None)
+    return {"available": True, **d}
+
+
 @app.get("/api/rebalance")
 def get_rebalance(source: Source = "live", at: str | None = None):
     recs, _, as_of = _state(source, at)

@@ -20,7 +20,7 @@ export default function FilterPanel({ stations, visible, setVisible, onPick }) {
   };
   return (
     <div className="left-panel glass">
-      <div className="panel-title"><h3>Stations</h3><span className="dim num">{stations.length.toLocaleString()}</span></div>
+      <div className="panel-title"><h3>Stations</h3><span className="dim num">{stations.length.toLocaleString("en-US")}</span></div>
       <div className="search">
         <input placeholder="Search a station…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search stations" />
       </div>
@@ -36,7 +36,7 @@ export default function FilterPanel({ stations, visible, setVisible, onPick }) {
           <button key={k} className={`filter ${visible.has(k) ? "" : "off"}`} onClick={() => toggle(k)} aria-pressed={visible.has(k)}>
             <span className="sw" style={{ background: STATUS[k].color }} />
             {STATUS[k].label}
-            <span className="cnt">{(counts[k] || 0).toLocaleString()}</span>
+            <span className="cnt">{(counts[k] || 0).toLocaleString("en-US")}</span>
           </button>
         ))}
       </div>

@@ -4,7 +4,7 @@ import { nyDateTime } from "../lib/format";
 export default function ReplayBar() {
   const { timeline, idx, setIdx, playing, setPlaying, speed, setSpeed } = useMode();
   const n = timeline?.times?.length ?? 0;
-  if (!n) return <div className="replay glass"><span className="muted">{timeline?.error ? "No replay yet — run scripts/make_replay.sh" : "Loading replay…"}</span></div>;
+  if (!n) return <div className="replay glass"><span className="muted">{timeline?.error ? "No replay yet: run scripts/make_replay.sh" : "Loading replay…"}</span></div>;
   return (
     <div className="replay glass" aria-label="Replay controls">
       <button className="play" onClick={() => setPlaying(!playing)} aria-label={playing ? "Pause" : "Play"}>{playing ? "❚❚" : "▶"}</button>

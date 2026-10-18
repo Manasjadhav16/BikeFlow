@@ -16,7 +16,7 @@ export default function CityPulse({ pulse }) {
               return (
                 <g key={x.hour}>
                   <rect className={`bar ${cur ? "cur" : ""}`} x={4 + i * bw + 1} y={H - 16 - bh} width={Math.max(2, bw - 2)} height={bh} rx="2" />
-                  {cur && <text x={4 + i * bw + bw / 2} y={H - 20 - bh} textAnchor="middle" style={{ fill: "#e8edf5", fontWeight: 700 }}>{x.in_use_est.toLocaleString()}</text>}
+                  {cur && <text x={4 + i * bw + bw / 2} y={H - 20 - bh} textAnchor="middle" style={{ fill: "#e8edf5", fontWeight: 700 }}>{x.in_use_est.toLocaleString("en-US")}</text>}
                   {(i % Math.ceil(h.length / 6) === 0) && <text x={4 + i * bw + bw / 2} y={H - 4} textAnchor="middle">{x.label.slice(4, 6)}h</text>}
                 </g>
               );

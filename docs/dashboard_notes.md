@@ -50,6 +50,7 @@ take `?at=<ISO time>`, which drives the time slider.
 | `GET /api/ticker` | Newest alert episodes (last 3 h) for the ticker. |
 | `GET /api/pulse` | Estimated bikes out on the street per 15 min and per hour: peak docked total in the recording minus docked now, so depots and vans are not counted. |
 | `GET /api/timeline` | Replay batch times and window (for the slider). |
+| `GET /api/models` | PRELIMINARY nowcast model comparison from `outputs/metrics/nowcast_metrics.json`, read fresh on every request (no cache), so rerunning `python -m src.nowcast` updates the page; returns `available: false` with a message if the file is missing. |
 | `GET /api/scores` | `?source=replay`: the replay window's precision/recall vs the simple rule. `?source=live`: the same for live alerts since the last restart (background scoring, never blocks; `enough=false` below 50 resolved alerts). |
 | `GET /api/insights` | Stage 1/2/2b results from `outputs/metrics/` (+ daily rides, and a weekday × hour heatmap derived from `expected_demand.parquet`). |
 | `GET /api/health` | Last live and replay batch (time, duration, rows), collector last poll and Kafka counters, process status, stale flag. |
