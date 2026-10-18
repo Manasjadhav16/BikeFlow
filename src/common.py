@@ -67,7 +67,7 @@ def _ensure_java_home() -> None:
 
 
 def get_spark(app_name: str, driver_memory: str = "3g", cores: int = 3, shuffle_partitions: int = 32,
-              packages: str | None = None):
+              packages: str | None = None, scratch_root: Path | None = None):
     """SparkSession sized for an 8 GB laptop (defaults: 3 cores, 3 GB driver, small partitions, AQE).
     Stage 3b (alongside Kafka and the collector) uses 2g / local[2] / 16 partitions."""
     _ensure_java_home()
@@ -78,7 +78,7 @@ def get_spark(app_name: str, driver_memory: str = "3g", cores: int = 3, shuffle_
 
     # Each Spark process gets its own scratch dir: a shared one let one job's cleanup delete
     # another running job's shuffle files (it crashed the live stream once).
-    local_dir = SPARK_TMP / f"{app_name}-{os.getpid()}"
+    local_dir = (scratch_root or SPARK_TMP) / f"{app_name}-{os.getpid()}"
     local_dir.mkdir(parents=True, exist_ok=True)
     builder = (
         SparkSession.builder.appName(app_name)
