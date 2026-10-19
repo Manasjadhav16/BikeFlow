@@ -14,16 +14,21 @@ Features: bikes, docks, capacity, change in bikes over 5 / 15 / 30 min, expected
 arrivals for the next 30 min (the alert engine's lookup: historical average for the overlapping
 15-min buckets x weather factor), temperature, precipitation, hour and weekday (New York).
 
-Split by time, never randomly: with >= 3 usable New York days, test = latest full day,
-validation = the day before, train = the rest; otherwise a chronological 60/20/20 split of the
-usable snapshot times (reported as a fallback). Negatives are subsampled for training only.
+Split by time, never randomly: with >= 3 usable full New York days, test = latest full day,
+validation = the day before, train = the rest. With 1-2 full days, test = latest full day and the
+usable snapshots before it are split chronologically: last 25 % validation, the rest train.
+Otherwise a chronological 60/20/20 split of the usable snapshot times (reported as a fallback). Negatives are subsampled for training only.
 
 Models: persistence (no alert), the rule bikes <= 2 / docks <= 2, the alert engine score
 (Skellam), and Spark MLlib logistic regression, random forest (small) and GBT. Thresholds for
 scored models are chosen on validation (max F1). Metrics on the full test set.
 
     python -m src.nowcast
+
+Results are written to temporary files and moved onto nowcast_metrics.json and
+nowcast_comparison.png only after the whole run has finished.
 """
+import os
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -189,6 +194,15 @@ def time_split(df: pd.DataFrame, usable_t: np.ndarray) -> tuple[pd.Series, dict]
         split = np.where(day == test_day, "test", np.where(day == val_day, "validation",
                                                             np.where(day < val_day, "train", "unused")))
         rule = f"test = latest full NY day ({test_day}), validation = {val_day}, train = earlier"
+    elif full_days:
+        test_day = full_days[-1]
+        day = pd.to_datetime(df["t"], unit="s", utc=True).dt.tz_convert(TZ).dt.strftime("%Y-%m-%d")
+        before = np.sort(usable_t[pd.Series(ny_day).to_numpy() < test_day])
+        cut = before[int(len(before) * 0.75)]
+        split = np.where(day == test_day, "test",
+                         np.where(day < test_day, np.where(df["t"] < cut, "train", "validation"), "unused"))
+        rule = (f"test = latest full NY day ({test_day}); fewer than 3 full days, so the usable snapshots "
+                f"before it are split chronologically: first 75 % train, last 25 % validation")
     else:
         ts = np.sort(usable_t)
         c1, c2 = ts[int(len(ts) * 0.6)], ts[int(len(ts) * 0.8)]
@@ -285,7 +299,7 @@ def fit_predict(spark, train: pd.DataFrame, val: pd.DataFrame, test: pd.DataFram
     return out
 
 
-def chart(results: dict, path: Path) -> None:
+def chart(results: dict, path: Path, title: str) -> None:
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -318,7 +332,7 @@ def chart(results: dict, path: Path) -> None:
     ax.set_xticks(x, [n.replace("_", "\n") for n in names], fontsize=9)
     ax.set_title("F1 on test (threshold chosen on validation)", loc="left", fontsize=12)
     ax.legend(frameon=False); ax.grid(axis="y", alpha=0.3)
-    fig.suptitle("PRELIMINARY nowcast: one ~11-hour evening of live snapshots (see docs/nowcast_notes.md)", x=0.01,
+    fig.suptitle(title, x=0.01,
                  ha="left", fontsize=13, color="#b45309")
     fig.tight_layout()
     fig.savefig(path, dpi=140)
@@ -378,8 +392,13 @@ def main() -> None:
     finally:
         stop_spark(spark)
 
+    gaps = np.diff(S[usable])
+    hours = float(gaps[gaps <= MAX_GAP].sum()) / 3600
+    n_days = len(split_info["usable_snapshots_per_ny_day"])
+    status = (f"PRELIMINARY: about {hours:.0f} hours of usable live snapshots over {n_days} New York days; "
+              f"not a reliable evaluation")
     report = {
-        "status": "PRELIMINARY: about 11 hours of usable live snapshots (one evening); not a reliable evaluation",
+        "status": status,
         "computed_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "setup": {"horizon_min": 30, "max_gap_min": MAX_GAP / 60, "silent_station_min": SILENT_S / 60,
                   "negatives_per_positive_in_train": NEG_PER_POS, "features": FEATURES,
@@ -387,8 +406,13 @@ def main() -> None:
         "data": counts, "split": split_info, "results": results,
         "runtime_s": round(time.time() - t_all, 1),
     }
-    write_json(OUT_JSON, report)
-    chart(results, CHARTS_DIR / "nowcast_comparison.png")
+    out_png = CHARTS_DIR / "nowcast_comparison.png"
+    tmp_json, tmp_png = OUT_JSON.with_name("nowcast_metrics.tmp.json"), out_png.with_name("nowcast_comparison.tmp.png")
+    write_json(tmp_json, report)
+    chart(results, tmp_png, f"PRELIMINARY nowcast: about {hours:.0f} hours of usable live snapshots over {n_days} "
+                            f"New York days (see docs/nowcast_notes.md)")
+    os.replace(tmp_png, out_png)
+    os.replace(tmp_json, OUT_JSON)
     stamp(f"DONE in {report['runtime_s']:.0f}s -> {OUT_JSON}")
 
 
